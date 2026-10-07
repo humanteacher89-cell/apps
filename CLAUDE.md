@@ -8,6 +8,7 @@
 |---|---|---|
 | `index.html` | 앱 목록 첫 화면 | https://humanteacher89-cell.github.io/apps/ |
 | `game-maker/index.html` | 게임 메이커 테스트(초등 5~6학년, 질문 11개 → AI에게 부탁하는 글과 카드 한 장). HTML 한 장, 서버·저장 없음(브라우저 localStorage만) | …/apps/game-maker/ |
+| `hangeul-oneshot/` | 한글원샷(프랑스 한글학교 레벨별 자료 저장소, QR 한 번에 내 레벨 자료). HTML 한 장 + 설정 + 구글시트 서버 코드 + 홈 화면 추가. **이 폴더를 고칠 때는 먼저 `hangeul-oneshot/CLAUDE.md`를 읽는다**(동작·지킬 것·지금 상태와 남은 일이 거기 있다) | …/apps/hangeul-oneshot/ |
 
 ## 지킬 것
 - 앱 하나 = 폴더 하나. 새 앱을 더하면 `index.html` 목록에 한 줄 더한다.
@@ -16,8 +17,8 @@
 - `main`에 바로 올리지 말고 새 브랜치 + PR. 합치기는 휴먼쌤.
 
 ## 지금 상태와 남은 일 (인수인계 — 작업을 마칠 때 이 절을 고친다)
-- 마지막 작업(2026-10-07, PC): 저장소 시작. 게임 메이커 테스트를 휴먼쌤이 준 파일 그대로 올림.
-- 남은 일: 없음(휴먼쌤 폰 확인 뒤 고칠 점이 오면 반영).
+- 마지막 작업(2026-10-07, PC): 저장소 시작. 게임 메이커 테스트를 휴먼쌤이 준 파일 그대로 올림(오전, 약속 체크박스·카드 이미지 저장 고침). 오후에 한글원샷 시제품을 `hangeul-oneshot/`으로 처음 올리고 목록에 한 줄 더함(휴먼쌤 "여기까지 업로드하고 클라우드 세션에서 이어서").
+- 남은 일: 게임 메이커는 없음(고칠 점이 오면 반영). 한글원샷은 `hangeul-oneshot/CLAUDE.md` '지금 상태와 남은 일'을 본다.
 
 ## 확인하는 법
-- 정적 파일이다. `python3 -m http.server 8000` 뒤 `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/game-maker/`가 200인지 본다.
+- 정적 파일이다. `python3 -m http.server 8000` 뒤 `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/game-maker/`가 200인지 본다(한글원샷은 `/hangeul-oneshot/`, 자세한 확인법은 그 폴더 `CLAUDE.md`).
