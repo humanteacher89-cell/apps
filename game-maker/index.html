@@ -163,9 +163,11 @@ button{cursor:pointer}
   border:2px solid var(--line);border-radius:14px;background:var(--surface);padding:12px 14px;
 }
 .pledge h2{margin:0 0 6px;font-size:15px;font-weight:700;color:var(--pop)}
-.pledge ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:14.5px}
-.pledge li{display:flex;gap:8px}
-.pledge li::before{content:"✓";color:var(--pop);font-weight:700}
+.pledge ul{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:15px}
+.pledge label{display:flex;align-items:flex-start;gap:10px;padding:4px 2px;cursor:pointer}
+.pledge input{flex:none;width:22px;height:22px;margin:1px 0 0;accent-color:var(--pop);cursor:pointer}
+.pledge .left{margin:8px 0 0;font-size:13.5px;font-weight:600;color:var(--ink-soft)}
+.pledge.all .left{color:var(--ok)}
 .start-shot{display:none;margin:0}
 .shot-box{
   aspect-ratio:32/47;max-width:100%;overflow:hidden;border-radius:18px;border:2px solid var(--line);
@@ -204,14 +206,17 @@ button{cursor:pointer}
 .actions .btn{padding:10px 14px;font-size:15px;box-shadow:0 3px 0 var(--shadow)}
 .actions .btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--shadow)}
 .actions .primary{flex:1 1 0;min-width:0;font-size:16px;padding:12px 8px}
-.actions .save{flex:0 0 auto;padding-inline:12px}
+.actions .save{flex:1 1 0;min-width:0;font-size:16px;padding:12px 8px}
+.img-box{display:grid;place-items:center;min-height:0}
+.img-box img{display:block;max-width:100%;max-height:62vh;border-radius:12px;-webkit-touch-callout:default;user-select:auto}
 .actions .sub{flex:1 1 auto;padding-inline:8px;font-size:14px}
 .capture-hint{margin:0;text-align:center;font-size:12.5px;color:var(--ink-soft)}
 @media (min-width:760px){
   .actions{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:center}
   .act-row{display:contents}
   .actions .primary{flex:0 1 auto;padding-inline:26px;font-size:16.5px}
-  .actions .save,.actions .sub{flex:0 1 auto;padding-inline:16px;font-size:15px}
+  .actions .save{flex:0 1 auto;padding-inline:26px;font-size:16.5px}
+  .actions .sub{flex:0 1 auto;padding-inline:16px;font-size:15px}
   .capture-hint{margin-left:6px}
 }
 
@@ -255,6 +260,15 @@ button{cursor:pointer}
     <p>글을 길게 눌러 모두 고른 다음 복사해요.</p>
     <textarea id="sheetText" readonly></textarea>
     <button type="button" class="btn primary" id="sheetClose">닫기</button>
+  </div>
+</div>
+
+<div class="sheet" id="imgSheet" hidden>
+  <div class="sheet-box" role="dialog" aria-modal="true" aria-labelledby="imgSheetTitle">
+    <h2 id="imgSheetTitle">카드 이미지 저장</h2>
+    <p>그림을 길게 눌러 ‘이미지 저장’ 또는 ‘사진에 저장’을 골라요.</p>
+    <div class="img-box"><img id="imgSheetImg" alt="내 게임 카드"></div>
+    <button type="button" class="btn primary" id="imgSheetClose">닫기</button>
   </div>
 </div>
 
@@ -683,6 +697,7 @@ function renderCard(s, boxW, boxH, example){
 }
 
 /* ---------- 화면 흐름 ---------- */
+const PLEDGES = ['이름·학교·전화번호 같은 개인정보는 쓰지 않아요.', '유명한 게임 캐릭터 대신 내가 만든 캐릭터를 써요.', '무섭거나 나쁜 내용은 부탁하지 않아요.', 'AI도 틀릴 수 있어요. 이상하면 선생님께 말해요.'];
 const FLOW = ['p1','p2','p3','reveal','hero','target','extra','device','end','fun','style','title'];
 const QNUM = FLOW.filter(k => k !== 'reveal');
 const KEY = 'game-maker-test-v1';
@@ -796,15 +811,12 @@ function renderStart(){
       <h1 id="qh" tabindex="-1">게임 메이커 <span>테스트</span></h1>
       <p class="lede">질문 11개에 답하면 내가 만들고 싶은 게임을 찾아서, AI에게 부탁하는 글로 바꿔 줘요.</p>
       <ul class="kinds" aria-label="만들 수 있는 게임">${TYPE_ORDER.map(k => `<li>${iconSVG(k, 20)}${esc(TYPES[k].kind)}</li>`).join('')}</ul>
-      <div class="pledge"><h2>AI 사용 약속</h2><ul>
-        <li>이름·학교·전화번호 같은 개인정보는 쓰지 않아요.</li>
-        <li>유명한 게임 캐릭터 대신 내가 만든 캐릭터를 써요.</li>
-        <li>무섭거나 나쁜 내용은 부탁하지 않아요.</li>
-        <li>AI도 틀릴 수 있어요. 이상하면 선생님께 말해요.</li>
-      </ul></div>
+      <div class="pledge" id="pledge"><h2>AI 사용 약속 <span class="opt-note">(하나씩 읽고 체크해요)</span></h2><ul>
+        ${PLEDGES.map((p, i) => `<li><label><input type="checkbox" class="pl" id="pl${i}">${esc(p)}</label></li>`).join('')}
+      </ul><p class="left" id="plLeft" aria-live="polite"></p></div>
       <div class="nav col">
-        <button type="button" class="btn primary wide" id="startBtn">약속을 지킬게요! 시작하기</button>
-        ${saved ? '<button type="button" class="btn wide" id="resumeBtn">하던 곳부터 이어서 하기</button>' : ''}
+        <button type="button" class="btn primary wide" id="startBtn" disabled>약속을 지킬게요! 시작하기</button>
+        ${saved ? '<button type="button" class="btn wide" id="resumeBtn" disabled>하던 곳부터 이어서 하기</button>' : ''}
       </div>
     </div>
     <figure class="start-shot">
@@ -812,6 +824,16 @@ function renderStart(){
       <figcaption>마지막에 이런 카드 한 장이 나와요</figcaption>
     </figure>
   </section>`;
+  const boxes = [...view.querySelectorAll('.pl')];
+  const syncPledge = () => {
+    const left = boxes.filter(b => !b.checked).length;
+    $('#startBtn').disabled = left > 0;
+    if (saved) $('#resumeBtn').disabled = left > 0;
+    $('#pledge').classList.toggle('all', left === 0);
+    $('#plLeft').textContent = left ? `약속 ${left}개를 더 체크하면 시작할 수 있어요.` : '약속을 모두 체크했어요!';
+  };
+  boxes.forEach(b => b.addEventListener('change', syncPledge));
+  syncPledge();
   $('#startBtn').onclick = () => { S = blank(); go('p1'); };
   if (saved) $('#resumeBtn').onclick = () => { S = saved; render(); };
   drawExample();
@@ -933,14 +955,14 @@ function renderResult(){
     <div class="actions">
       <div class="act-row">
         <button type="button" class="btn primary" id="copyBtn">부탁하는 글 복사하기</button>
-        <button type="button" class="btn save" id="saveBtn" hidden>이미지 저장</button>
+        <button type="button" class="btn coin save" id="saveBtn">카드 이미지 저장</button>
       </div>
       <div class="act-row">
         <a class="btn sub" href="https://gemini.google.com/" target="_blank" rel="noopener">제미나이 ↗</a>
         <button type="button" class="btn sub" id="editBtn">고치기</button>
         <button type="button" class="btn sub" id="againBtn">처음부터</button>
       </div>
-      <p class="capture-hint" id="capHint">이 화면을 캡처하면 카드가 한 장으로 저장돼요.</p>
+      <p class="capture-hint" id="capHint">저장이 안 되면 이 화면을 캡처해도 돼요.</p>
     </div>
     <p class="sr-only" id="promptText">${esc(prompt)}</p>
   </section>`;
@@ -1005,20 +1027,33 @@ function legacyCopy(text){
     return !!ok;
   } catch (e) { return false; }
 }
+/* 저장: 휴대폰은 공유 창(사진에 저장), 안 되면 길게 눌러 저장하는 창. 컴퓨터는 바로 내려받기 */
 async function saveImage(){
-  if (!dl || !cardBlob) return;
-  try {
-    await dl.save({ filename: `${S.title.replace(/[\\/:*?"<>|]/g, '').trim() || '내 게임'} 게임 카드.png`, data: cardBlob });
-    toast('이미지 내려받기를 시작했어요.');
-  } catch (e) {
-    const code = e && e.code;
-    if (code === 'declined') return;
-    if (code === 'rate_limited') return toast('잠시 뒤에 다시 눌러 주세요.');
-    dl = null;
-    const b = $('#saveBtn'), h = $('#capHint'); if (b) b.hidden = true; if (h) h.hidden = false;
-    toast('여기서는 저장할 수 없어요. 화면을 캡처해 주세요.');
+  if (!cardBlob) return toast('카드를 그리는 중이에요. 잠시 뒤에 눌러 주세요.');
+  const filename = `${S.title.replace(/[\\/:*?"<>|]/g, '').trim() || '내 게임'} 게임 카드.png`;
+  let coarse = false; try { coarse = matchMedia('(pointer:coarse)').matches; } catch (e) {}
+  if (coarse){
+    let file = null; try { file = new File([cardBlob], filename, { type:'image/png' }); } catch (e) {}
+    if (file && navigator.canShare && navigator.share){
+      let can = false; try { can = navigator.canShare({ files:[file] }); } catch (e) {}
+      if (can){
+        try { await navigator.share({ files:[file] }); return; }
+        catch (e) { if (e && e.name === 'AbortError') return; }
+      }
+    }
+    return openImgSheet();
   }
+  try { await dl.save({ filename, data: cardBlob }); toast('카드 이미지를 내려받았어요.'); }
+  catch (e) { openImgSheet(); }
 }
+function openImgSheet(){
+  $('#imgSheetImg').src = cardURL;
+  $('#imgSheet').hidden = false;
+  $('#imgSheetClose').focus();
+}
+function closeImgSheet(){ $('#imgSheet').hidden = true; const b = $('#saveBtn'); if (b) b.focus(); }
+$('#imgSheetClose').onclick = closeImgSheet;
+$('#imgSheet').addEventListener('click', e => { if (e.target.id === 'imgSheet') closeImgSheet(); });
 function toast(msg){
   const t = $('#toast'); t.textContent = msg; t.hidden = false;
   clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2600);
@@ -1030,10 +1065,10 @@ function openSheet(text){
 function closeSheet(){ $('#sheet').hidden = true; const b = $('#copyBtn'); if (b) b.focus(); }
 $('#sheetClose').onclick = closeSheet;
 $('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('#sheet').hidden) closeSheet(); if (!$('#imgSheet').hidden) closeImgSheet(); });
 $('#backBtn').onclick = back;
 window.addEventListener('fontcss', () => { fontWait = 2500; if (S.step === 'result') paintCard(true); else if (S.step === 'start') drawExample(); });
-window.addEventListener('resize', () => { if (S.step !== 'result' || stageRO) return; clearTimeout(paintT); paintT = setTimeout(paintCard, 160); });
+window.addEventListener('resize', () => { const sb = $('#shotBox'); if (S.step === 'start' && sb && !sb.firstChild && sb.offsetParent){ drawExample(); return; } if (S.step !== 'result' || stageRO) return; clearTimeout(paintT); paintT = setTimeout(paintCard, 160); });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (S.step === 'result') paintCard(true); });
 
 dl = { local:true, save: ({ filename, data }) => new Promise((resolve, reject) => {
