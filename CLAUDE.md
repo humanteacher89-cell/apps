@@ -8,7 +8,7 @@
 |---|---|---|
 | `index.html` | 앱 목록 첫 화면 | https://humanteacher89-cell.github.io/apps/ |
 | `game-maker/index.html` | 게임 메이커 테스트(초등 5~6학년, 질문 11개 → AI에게 부탁하는 글과 카드 한 장). HTML 한 장, 서버·저장 없음(브라우저 localStorage만) | …/apps/game-maker/ |
-| `hangeul-oneshot/` | 한글원샷(프랑스 한글학교 레벨별 자료 저장소, QR 한 번에 내 레벨 자료). HTML 한 장 + 설정 + 구글시트 서버 코드 + 홈 화면 추가. **이 폴더를 고칠 때는 먼저 `hangeul-oneshot/CLAUDE.md`를 읽는다**(동작·지킬 것·지금 상태와 남은 일이 거기 있다) | …/apps/hangeul-oneshot/ |
+| `hangeul-oneshot/` | **옮겨 감(2026-10-16)**: 한글원샷은 자기 저장소 `hangeul-oneshot`(https://humanteacher89-cell.github.io/hangeul-oneshot/)으로 분리했다. 이 폴더에는 새 주소로 넘기는 `index.html`과 옛 서비스 워커를 지우는 `sw.js`만 있다. 한글원샷 일은 그 저장소에서 한다 | …/apps/hangeul-oneshot/ → 새 주소 |
 
 ## 지킬 것
 - 앱 하나 = 폴더 하나. 새 앱을 더하면 `index.html` 목록에 한 줄 더한다.
