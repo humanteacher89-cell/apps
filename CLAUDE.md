@@ -8,6 +8,7 @@
 |---|---|---|
 | `index.html` | 앱 목록 첫 화면 | https://humanteacher89-cell.github.io/apps/ |
 | `game-maker/index.html` | 게임 메이커 테스트(초등 5~6학년, 질문 11개 → AI에게 부탁하는 글과 카드 한 장). HTML 한 장, 서버·저장 없음(브라우저 localStorage만) | …/apps/game-maker/ |
+| (목록 링크만) | **공기 분자 실험실**(2026-10-18 목록에 더함): 내 방 공기를 1억 배 키워 손으로 분자를 집고 누르는 WebXR 과학 앱(휴대폰 화면·안드로이드 혼합현실·퀘스트·PC). 코드는 `my-3d-world` 저장소 `air/`(공용 엔진 `vr-core/core.js`)에 있고, 이 저장소에는 `index.html` 목록 한 줄만 있다. 앱 일은 `my-3d-world`에서 한다 | https://humanteacher89-cell.github.io/my-3d-world/air/ |
 | `hangeul-oneshot/` | **옮겨 감(2026-10-16)**: 한글원샷은 자기 저장소 `hangeul-oneshot`(https://humanteacher89-cell.github.io/hangeul-oneshot/)으로 분리했다. 이 폴더에는 새 주소로 넘기는 `index.html`과 옛 서비스 워커를 지우는 `sw.js`만 있다. 한글원샷 일은 그 저장소에서 한다 | …/apps/hangeul-oneshot/ → 새 주소 |
 
 ## 지킬 것
@@ -19,7 +20,8 @@
 ## 지금 상태와 남은 일 (인수인계 — 작업을 마칠 때 이 절을 고친다)
 - 마지막 작업(2026-10-07, PC): 저장소 시작. 게임 메이커 테스트를 휴먼쌤이 준 파일 그대로 올림(오전, 약속 체크박스·카드 이미지 저장 고침). 오후에 한글원샷 시제품을 `hangeul-oneshot/`으로 처음 올리고 목록에 한 줄 더함(휴먼쌤 "여기까지 업로드하고 클라우드 세션에서 이어서").
 - 같은 날 저녁(클라우드 세션): 한글원샷 점검(공개 주소·문법·휴대폰 크기 시험 모드) + `Code.gs` 교사 코드 칸 글자 형식으로. 이어서 한글원샷 자료 카드마다 QR 버튼(자료별 QR).
-- 남은 일: 게임 메이커는 없음(고칠 점이 오면 반영). 한글원샷은 `hangeul-oneshot/CLAUDE.md` '지금 상태와 남은 일'을 본다.
+- 2026-10-18(PC): 목록에 **공기 분자 실험실** 링크 한 줄(휴먼쌤 "공기분자 실험실을 이 앱 목록에 올리기"). 앱 본체는 `my-3d-world/air/` 그대로(이 저장소로 복사하지 않음 — 공용 엔진·효과음·캐릭터 파일을 그 저장소와 함께 쓰기 때문). 앱 안의 숫자·문장은 '확인 전' 초안.
+- 남은 일: 게임 메이커는 없음(고칠 점이 오면 반영). 한글원샷은 `hangeul-oneshot/CLAUDE.md` '지금 상태와 남은 일'을 본다. 공기 분자 실험실은 `my-3d-world` 저장소 `CLAUDE.md`를 본다.
 
 ## 확인하는 법
 - 정적 파일이다. `python3 -m http.server 8000` 뒤 `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/game-maker/`가 200인지 본다(한글원샷은 `/hangeul-oneshot/`, 자세한 확인법은 그 폴더 `CLAUDE.md`).
