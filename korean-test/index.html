@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>한국어 실력 테스트</title>
+<style>
+/* 한 화면 앱: 언어 고르기 → 단계별 문제(단계마다 4문제, 3개 이상 맞히면 다음 단계) → 결과와 틀린 문제 */
+:root{
+  --bg:#EDF0FB; --surface:#FFFFFF; --ink:#1B2152; --ink-soft:#525A8C;
+  --line:#1B2152; --track:#CBD2EF;
+  --brand:#3D55D6; --brand-ink:#FFFFFF; --coin:#FFC93C;
+  --pop:#C9431D; --pop-soft:#FFE8DD; --ok:#136F50; --ok-soft:#DDF3EA;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1330; --surface:#1A2050; --ink:#EEF1FF; --ink-soft:#AEB6E6;
+    --line:#6976E0; --track:#2A3270;
+    --brand:#8497FF; --brand-ink:#0B0E2A; --coin:#FFC93C;
+    --pop:#FFA283; --pop-soft:#33203A; --ok:#62D9AC; --ok-soft:#12352E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1330; --surface:#1A2050; --ink:#EEF1FF; --ink-soft:#AEB6E6;
+  --line:#6976E0; --track:#2A3270;
+  --brand:#8497FF; --brand-ink:#0B0E2A; --coin:#FFC93C;
+  --pop:#FFA283; --pop-soft:#33203A; --ok:#62D9AC; --ok-soft:#12352E;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Noto Sans CJK KR",system-ui,sans-serif;
+  font-size:16px;line-height:1.55;word-break:keep-all;overflow-wrap:anywhere;
+  -webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+[hidden]{display:none!important}
+main{max-width:640px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px max(32px,env(safe-area-inset-bottom))}
+.brand{font-size:14px;font-weight:700;color:var(--ink-soft);margin:0 0 4px}
+h1{margin:0 0 6px;font-size:28px;line-height:1.25}
+h2{margin:0;font-size:22px;line-height:1.3}
+.sub{margin:0 0 20px;color:var(--ink-soft)}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:20px 18px;margin-bottom:16px}
+.btn{
+  display:block;width:100%;padding:14px 16px;margin-top:12px;border-radius:14px;
+  border:2px solid var(--line);background:var(--brand);color:var(--brand-ink);
+  font-size:18px;font-weight:700;
+}
+.btn.plain{background:var(--surface);color:var(--ink)}
+.langs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.langs .btn{margin:0}
+.note{font-size:14px;color:var(--ink-soft);margin:12px 0 0}
+
+/* 진행 막대 */
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:14px;font-weight:700;color:var(--ink-soft)}
+.track{flex:1;height:10px;border-radius:99px;background:var(--track);overflow:hidden}
+.fill{height:100%;width:0;background:var(--brand);transition:width .25s}
+.stage{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--coin);color:#1B2152;font-size:13px;font-weight:700;margin-bottom:10px}
+.ask{margin:6px 0 2px;font-weight:700}
+.ask-l{margin:0 0 14px;color:var(--ink-soft);font-size:15px}
+.prompt{font-size:26px;font-weight:700;margin:6px 0 4px;text-align:center}
+.prompt.roman{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em}
+.passage{background:var(--bg);border-radius:12px;padding:12px 14px;margin:0 0 12px;font-size:17px}
+.q{font-size:18px;font-weight:700;margin:0 0 4px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.opts.wide{grid-template-columns:1fr}
+.opt{
+  min-height:56px;padding:12px;border-radius:12px;border:2px solid var(--line);
+  background:var(--surface);font-size:20px;font-weight:600;text-align:center;
+}
+.opts.wide .opt{font-size:17px;text-align:left}
+.opt:active{transform:translateY(1px)}
+.opt[disabled]{cursor:default}
+
+/* 결과 */
+.level{font-size:15px;font-weight:700;color:var(--brand);margin:0 0 2px}
+.rows{list-style:none;padding:0;margin:14px 0 0}
+.rows li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--track)}
+.rows li span:last-child{font-weight:700;white-space:nowrap}
+.rows li.skip span:last-child{color:var(--ink-soft);font-weight:400}
+.wrong{list-style:none;padding:0;margin:10px 0 0}
+.wrong li{padding:10px 0;border-top:1px solid var(--track)}
+.wrong .mine{color:var(--pop)}
+.wrong .right{color:var(--ok);font-weight:700}
+</style>
+</head>
+<body>
+<main>
+  <noscript><p>이 앱은 자바스크립트가 필요합니다. / JavaScript is required. / JavaScript est nécessaire.</p></noscript>
+
+  <!-- 첫 화면: 안내 언어 고르기 -->
+  <section id="start">
+    <p class="brand">휴먼쌤</p>
+    <h1>한국어 실력 테스트</h1>
+    <p class="sub">Korean level check · Test de niveau en coréen</p>
+    <div class="card">
+      <p style="margin:0 0 4px;font-weight:700">안내 언어를 고르세요</p>
+      <p style="margin:0 0 14px;color:var(--ink-soft)">Choose your language · Choisis ta langue</p>
+      <div class="langs">
+        <button class="btn" data-lang="en">English</button>
+        <button class="btn" data-lang="fr">Français</button>
+      </div>
+      <p class="note">5단계 · 최대 20문제 · 약 5~10분. 이름이나 개인 정보는 묻지 않습니다.</p>
+    </div>
+    <div class="card" id="last" hidden></div>
+  </section>
+
+  <!-- 문제 화면 -->
+  <section id="quiz" hidden>
+    <div class="bar"><span id="count"></span><div class="track"><div class="fill" id="fill"></div></div></div>
+    <div class="card">
+      <span class="stage" id="stage"></span>
+      <p class="ask" id="ask"></p>
+      <p class="ask-l" id="askL"></p>
+      <div id="body"></div>
+      <div class="opts" id="opts"></div>
+    </div>
+  </section>
+
+  <!-- 결과 화면 -->
+  <section id="result" hidden>
+    <p class="brand">휴먼쌤 · 한국어 실력 테스트</p>
+    <div class="card">
+      <p class="level" id="rLevel"></p>
+      <h2 id="rTitle"></h2>
+      <p id="rText" style="margin:8px 0 0"></p>
+      <ul class="rows" id="rRows"></ul>
+      <p class="note" id="rNote"></p>
+    </div>
+    <div class="card" id="rWrongCard">
+      <p style="margin:0;font-weight:700" id="rWrongHead"></p>
+      <ul class="wrong" id="rWrong"></ul>
+    </div>
+    <button class="btn" id="again"></button>
+    <button class="btn plain" id="home"></button>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+
+/* 문항: 단계마다 4문제. ans는 options의 정답 번호(0부터). 화면에서는 보기 순서를 섞는다.
+   문항·결과 문장은 '확인 전' 초안이다. 고칠 때는 이 표만 고치면 된다. */
+var STAGES = [
+  { ko:"한글 읽기", en:"Reading Hangul", fr:"Lire le hangeul", type:"roman",
+    askKo:"소리에 맞는 글자를 고르세요.", askEn:"Choose the letters that read:", askFr:"Choisis les lettres qui se lisent :",
+    items:[
+      { prompt:"ga",   options:["가","거","고","구"], ans:0 },
+      { prompt:"mo",   options:["모","무","머","마"], ans:0 },
+      { prompt:"han",  options:["한","함","할","항"], ans:0 },
+      { prompt:"ba-da",options:["바다","파다","바타","마다"], ans:0 }
+    ]},
+  { ko:"낱말", en:"Words", fr:"Vocabulaire", type:"meaning",
+    askKo:"뜻에 맞는 낱말을 고르세요.", askEn:"Choose the Korean word for:", askFr:"Choisis le mot coréen pour :",
+    items:[
+      { en:"water",     fr:"eau",     options:["물","불","밥","눈"], ans:0 },
+      { en:"school",    fr:"école",   options:["학교","학생","병원","시장"], ans:0 },
+      { en:"to eat",    fr:"manger",  options:["먹다","마시다","자다","가다"], ans:0 },
+      { en:"yesterday", fr:"hier",    options:["어제","내일","오늘","지금"], ans:0 }
+    ]},
+  { ko:"문법", en:"Grammar", fr:"Grammaire", type:"blank",
+    askKo:"빈칸에 알맞은 것을 고르세요.", askEn:"Choose what fits in the blank.", askFr:"Choisis ce qui va dans le blanc.",
+    items:[
+      { q:"저는 학생___.",           options:["이에요","예요","을","가"], ans:0 },
+      { q:"사과___ 먹어요.",          options:["를","을","는","이"], ans:0 },
+      { q:"친구___ 학교에 가요.",      options:["가","이","를","을"], ans:0 },
+      { q:"어제 영화를 ___.",         options:["봤어요","봐요","볼 거예요","보세요"], ans:0 }
+    ]},
+  { ko:"짧은 글 읽기", en:"Short reading", fr:"Lecture courte", type:"reading",
+    askKo:"글을 읽고 답하세요.", askEn:"Read the text and answer.", askFr:"Lis le texte et réponds.",
+    items:[
+      { passage:"민수는 아침 7시에 일어나요. 세수를 하고 빵을 먹어요. 그리고 버스를 타고 학교에 가요.",
+        q:"민수는 아침에 무엇을 먹어요?", options:["빵","밥","사과","우유"], ans:0 },
+      { passage:"민수는 아침 7시에 일어나요. 세수를 하고 빵을 먹어요. 그리고 버스를 타고 학교에 가요.",
+        q:"민수는 학교에 어떻게 가요?", options:["버스를 타고 가요.","걸어서 가요.","지하철을 타고 가요.","자전거를 타고 가요."], ans:0 },
+      { passage:"오늘은 비가 와요. 그래서 지수는 우산을 가지고 나갔어요. 저녁에는 친구와 같이 떡볶이를 먹을 거예요.",
+        q:"오늘 날씨는 어때요?", options:["비가 와요.","눈이 와요.","맑아요.","더워요."], ans:0 },
+      { passage:"오늘은 비가 와요. 그래서 지수는 우산을 가지고 나갔어요. 저녁에는 친구와 같이 떡볶이를 먹을 거예요.",
+        q:"지수는 저녁에 무엇을 할 거예요?", options:["친구와 떡볶이를 먹을 거예요.","집에서 잠을 잘 거예요.","우산을 살 거예요.","혼자 영화를 볼 거예요."], ans:0 }
+    ]},
+  { ko:"한 걸음 더", en:"One step further", fr:"Un pas de plus", type:"blank",
+    askKo:"빈칸에 알맞은 것을 고르세요.", askEn:"Choose what fits in the blank.", askFr:"Choisis ce qui va dans le blanc.",
+    items:[
+      { q:"배가 ___ 밥을 먹었어요.",               options:["고파서","고프지만","고프면","고프고"], ans:0 },
+      { q:"할머니께서 방에서 ___.",                 options:["주무세요","자요","잡니다","자라"], ans:0 },
+      { q:"비가 ___ 우산을 가져가세요.",             options:["오면","와서","오지만","오고"], ans:0 },
+      { q:"이 옷은 저한테 너무 커요. 좀 더 ___ 옷 있어요?", options:["작은","큰","비싼","많은"], ans:0 }
+    ]}
+];
+var PASS = 3; // 한 단계 4문제 중 이만큼 맞히면 다음 단계로
+
+/* 결과: 통과한 단계 수(0~5)마다 하나 */
+var LEVELS = [
+  { ko:"한글 첫걸음",   en:"Start with the Korean alphabet: basic consonants and vowels.",
+                        fr:"Commence par l'alphabet coréen : consonnes et voyelles de base." },
+  { ko:"한글을 읽어요", en:"You can read Hangul. Next: everyday words.",
+                        fr:"Tu sais lire le hangeul. Ensuite : les mots du quotidien." },
+  { ko:"낱말을 알아요", en:"You know basic words. Next: particles (은/는, 이/가, 을/를) and verb endings.",
+                        fr:"Tu connais des mots de base. Ensuite : les particules (은/는, 이/가, 을/를) et les terminaisons verbales." },
+  { ko:"문장을 만들어요", en:"You can handle basic sentences. Next: reading short texts.",
+                        fr:"Tu maîtrises les phrases de base. Ensuite : lire des textes courts." },
+  { ko:"짧은 글을 읽어요", en:"You understand short texts. Next: connecting endings (-아서, -면) and polite forms (높임말).",
+                        fr:"Tu comprends des textes courts. Ensuite : les terminaisons de liaison (-아서, -면) et les formes honorifiques (높임말)." },
+  { ko:"한 걸음 더 갔어요", en:"You passed every stage of this test. Try longer texts and real conversation.",
+                        fr:"Tu as réussi toutes les étapes de ce test. Essaie des textes plus longs et de vraies conversations." }
+];
+
+var UI = {
+  en:{ q:"Question", level:"Level", of:"of", stageRows:"Stage scores", notReached:"not reached",
+       note:"For reference only. This is not an official TOPIK level.",
+       wrong:"Questions to review", none:"No mistakes. Well done!", you:"Your answer", right:"Answer",
+       again:"Try again", home:"Change language", last:"Last result on this device", sep:": " },
+  fr:{ q:"Question", level:"Niveau", of:"sur", stageRows:"Score par étape", notReached:"non atteinte",
+       note:"À titre indicatif. Ce n'est pas un niveau officiel TOPIK.",
+       wrong:"Questions à revoir", none:"Aucune erreur. Bravo !", you:"Ta réponse", right:"Réponse",
+       again:"Recommencer", home:"Changer de langue", last:"Dernier résultat sur cet appareil", sep:" : " }
+};
+var KO = { level:"레벨", note:"참고용입니다. 공식 한국어능력시험(TOPIK) 등급이 아닙니다." };
+
+var KEY = "korean-test:v1";
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+function save(o){ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} }
+
+var $ = function(id){ return document.getElementById(id); };
+function el(tag, cls, text){ var n=document.createElement(tag); if(cls) n.className=cls; if(text!=null) n.textContent=text; return n; }
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function show(id){ ["start","quiz","result"].forEach(function(s){ $(s).hidden = (s!==id); }); window.scrollTo(0,0); }
+
+var lang="en", si=0, ii=0, scores=[], wrongs=[], asked=0, busy=false;
+var TOTAL = STAGES.reduce(function(n,s){ return n+s.items.length; },0);
+
+function begin(l){
+  lang=l; si=0; ii=0; scores=[0]; wrongs=[]; asked=0;
+  var st=load(); st.lang=l; save(st);
+  document.documentElement.lang = "ko";
+  show("quiz"); render();
+}
+
+function render(){
+  var s=STAGES[si], it=s.items[ii], u=UI[lang];
+  busy=false;
+  $("count").textContent = u.q+" "+(asked+1);
+  $("fill").style.width = (asked/TOTAL*100)+"%";
+  $("stage").textContent = (si+1)+". "+s.ko+" · "+s[lang];
+  $("ask").textContent = s.askKo;
+  $("askL").textContent = s["ask"+(lang==="en"?"En":"Fr")];
+
+  var body=$("body"); body.textContent="";
+  if(s.type==="roman"){
+    var p=el("p","prompt roman","« "+it.prompt+" »"); p.lang="en"; body.appendChild(p);
+  }else if(s.type==="meaning"){
+    var m=el("p","prompt",it[lang]); m.lang=lang; body.appendChild(m);
+  }else{
+    if(it.passage) body.appendChild(el("p","passage",it.passage));
+    body.appendChild(el("p","q",it.q));
+  }
+
+  var opts=$("opts"); opts.textContent="";
+  var long = it.options.some(function(o){ return o.length>5; });
+  opts.className = "opts"+(long?" wide":"");
+  shuffle(it.options.map(function(o,k){ return k; })).forEach(function(k){
+    var b=el("button","opt",it.options[k]);
+    b.type="button";
+    b.addEventListener("click",function(){ pick(k); });
+    opts.appendChild(b);
+  });
+}
+
+function pick(k){
+  if(busy) return; busy=true;
+  var s=STAGES[si], it=s.items[ii];
+  Array.prototype.forEach.call($("opts").children,function(b){ b.disabled=true; });
+  asked++;
+  if(k===it.ans) scores[si]++;
+  else wrongs.push({ stage:si, item:it, mine:it.options[k] });
+
+  ii++;
+  if(ii<s.items.length){ setTimeout(render,120); return; }
+  // 단계 끝: 통과하면 다음 단계, 아니면 결과
+  if(scores[si]>=PASS && si<STAGES.length-1){ si++; ii=0; scores.push(0); setTimeout(render,120); return; }
+  setTimeout(finish,120);
+}
+
+function passedCount(){ var n=0; for(var i=0;i<scores.length;i++){ if(scores[i]>=PASS) n++; else break; } return n; }
+
+function finish(){
+  var n=passedCount(), L=LEVELS[n], u=UI[lang];
+  $("rLevel").textContent = KO.level+" "+n+" / "+STAGES.length+" · "+u.level+" "+n;
+  $("rTitle").textContent = L.ko;
+  $("rText").textContent = L[lang]; $("rText").lang = lang;
+
+  var rows=$("rRows"); rows.textContent="";
+  STAGES.forEach(function(s,i){
+    var li=el("li",i<scores.length?"":"skip");
+    li.appendChild(el("span",null,(i+1)+". "+s.ko+" · "+s[lang]));
+    li.appendChild(el("span",null,i<scores.length ? scores[i]+" / "+s.items.length : u.notReached));
+    rows.appendChild(li);
+  });
+  $("rNote").textContent = KO.note+" "+u.note;
+
+  $("rWrongHead").textContent = wrongs.length ? u.wrong : u.none;
+  var w=$("rWrong"); w.textContent="";
+  wrongs.forEach(function(x){
+    var it=x.item, li=el("li");
+    var head = it.q || (it.prompt ? "« "+it.prompt+" »" : it[lang]);
+    li.appendChild(el("div",null,(x.stage+1)+". "+head));
+    li.appendChild(el("div","mine",u.you+u.sep+x.mine));
+    li.appendChild(el("div","right",u.right+u.sep+it.options[it.ans]));
+    w.appendChild(li);
+  });
+
+  $("again").textContent = "다시 하기 · "+u.again;
+  $("home").textContent = "처음으로 · "+u.home;
+
+  var st=load(); st.last={ level:n, scores:scores, at:new Date().toISOString().slice(0,10) }; save(st);
+  $("fill").style.width="100%";
+  show("result");
+}
+
+function showLast(){
+  var st=load(), box=$("last");
+  if(!st.last || typeof st.last.level!=="number" || !LEVELS[st.last.level]){ box.hidden=true; return; }
+  var u=UI[st.lang==="fr"?"fr":"en"];
+  box.textContent="";
+  box.appendChild(el("p","note",u.last+" ("+st.last.at+")")).style.margin="0 0 4px";
+  box.appendChild(el("p","level",KO.level+" "+st.last.level+" · "+LEVELS[st.last.level].ko)).style.margin="0";
+  box.hidden=false;
+}
+
+Array.prototype.forEach.call(document.querySelectorAll("[data-lang]"),function(b){
+  b.addEventListener("click",function(){ begin(b.getAttribute("data-lang")); });
+});
+$("again").addEventListener("click",function(){ begin(lang); });
+$("home").addEventListener("click",function(){ showLast(); show("start"); });
+showLast();
+})();
+</script>
+</body>
+</html>
