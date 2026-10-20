@@ -10,13 +10,13 @@
 (async function () {
   try { if (navigator.serviceWorker) { const rs = await navigator.serviceWorker.getRegistrations(); await Promise.all(rs.map(r => r.unregister())); } } catch (e) {}
   try { if (self.caches) { const ks = await caches.keys(); await Promise.all(ks.filter(k => k.indexOf('oneshot-') === 0).map(k => caches.delete(k))); } } catch (e) {}
-  location.replace('https://humanteacher89-cell.github.io/hangeul-oneshot/' + location.search + location.hash);
+  location.replace('../../hangeul-oneshot/' + location.search + location.hash);
 })();
 </script>
-<meta http-equiv="refresh" content="2;url=https://humanteacher89-cell.github.io/hangeul-oneshot/">
+<meta http-equiv="refresh" content="2;url=../../hangeul-oneshot/">
 </head>
 <body style="background:#FFF8EF;color:#2B2118;font-family:sans-serif;padding:24px;line-height:1.6">
 <p>한글원샷 주소가 바뀌었어요(2026-10-16). Le lien de Hangeul One-shot a changé.<br>
-자동으로 넘어가지 않으면 눌러 주세요 / Touchez ici : <a href="https://humanteacher89-cell.github.io/hangeul-oneshot/" style="color:#E04E2E">https://humanteacher89-cell.github.io/hangeul-oneshot/</a></p>
+자동으로 넘어가지 않으면 눌러 주세요 / Touchez ici : <a href="../../hangeul-oneshot/" style="color:#E04E2E">../../hangeul-oneshot/</a></p>
 </body>
 </html>
