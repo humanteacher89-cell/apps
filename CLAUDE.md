@@ -1,18 +1,18 @@
-# apps — 휴먼쌤 작은 앱 모음 (GitHub Pages 배포본)
+# apps — 휴먼쌤 작은 앱 모음 (공개 배포본)
 
-이 저장소는 그대로 GitHub Pages로 공개된다: https://humanteacher89-cell.github.io/apps/
+공개 주소: https://humanssaem-apps.pages.dev/apps/ (2026-10-20부터 Cloudflare Pages 프로젝트 humanssaem-apps). 같은 날 GitHub 계정이 정지되어 옛 GitHub Pages 주소(humanteacher89-cell.github.io/apps/)는 열리지 않는다. 계정이 풀리면 GitHub Pages도 다시 산다.
 사용자는 **휴먼쌤**이라고 부른다. 답은 한국어로, 휴대폰에서 읽기 쉽게 결과부터 짧게 쓴다. 이모지는 쓰지 않는다.
 
 ## 무엇이 어디에
 | 경로 | 무엇 | 공개 주소 |
 |---|---|---|
-| `index.html` | 앱 목록 첫 화면(2026-10-18 새 디자인: 크림 바탕 카드, 앱마다 색·그림·태그, 밝은/어두운 화면). 새 앱은 `<main>` 안 카드 `<a class="app">` 하나를 복사해 주소·이름·설명·태그·색(`data-c`)·그림만 바꾼다 | https://humanteacher89-cell.github.io/apps/ |
+| `index.html` | 앱 목록 첫 화면(2026-10-18 새 디자인: 크림 바탕 카드, 앱마다 색·그림·태그, 밝은/어두운 화면). 새 앱은 `<main>` 안 카드 `<a class="app">` 하나를 복사해 주소·이름·설명·태그·색(`data-c`)·그림만 바꾼다 | https://humanssaem-apps.pages.dev/apps/ |
 | `game-maker/index.html` | 게임 메이커 테스트(초등 5~6학년, 질문 11개 → AI에게 부탁하는 글과 카드 한 장). HTML 한 장, 서버·저장 없음(브라우저 localStorage만) | …/apps/game-maker/ |
 | `korean-test/index.html` | **한국어 실력 테스트**(2026-10-18 클라우드 세션): 해외 한국어 학습자용. 안내 언어 영어·프랑스어, 5단계(한글 읽기·낱말·문법·짧은 글 읽기·한 걸음 더) × 4문제, 단계마다 3개 이상 맞히면 다음 단계 → 레벨 0~5와 틀린 문제. HTML 한 장, 서버·이름 입력 없음(브라우저 localStorage에 언어·마지막 결과만). 문항은 파일 안 `STAGES` 표 | …/apps/korean-test/ |
-| (목록 링크만) | **공기 분자 실험실**(2026-10-18 목록에 더함): 내 방 공기를 1억 배 키워 손으로 분자를 집고 누르는 WebXR 과학 앱(휴대폰 화면·안드로이드 혼합현실·퀘스트·PC). 코드는 `my-3d-world` 저장소 `air/`(공용 엔진 `vr-core/core.js`)에 있고, 이 저장소에는 `index.html` 목록 한 줄만 있다. 앱 일은 `my-3d-world`에서 한다 | https://humanteacher89-cell.github.io/my-3d-world/air/ |
-| (목록 링크만) | **빛과 그림자 실험실**(2026-10-18 목록에 더함, 주황 카드): 손전등·거울로 빛과 그림자를 실험하는 WebXR 과학 앱. 코드는 `my-3d-world` 저장소 `light/`(공기 분자 실험실과 같은 공용 엔진). 앱 일은 `my-3d-world`에서 한다 | https://humanteacher89-cell.github.io/my-3d-world/light/ |
-| (목록 링크만) | **물의 상태 변화 실험실 · 손 위의 태양계 · 심장과 폐 탐험실**(2026-10-18 목록에 더함, 파랑 물방울 · 보라 행성 · 빨강 심장 카드): 같은 공용 엔진의 WebXR 과학 앱. 코드는 `my-3d-world` 저장소 `phase/` · `solar/` · `body/`. 앱 일은 `my-3d-world`에서 한다 | …/my-3d-world/phase/ · …/solar/ · …/body/ |
-| `hangeul-oneshot/` | **옮겨 감(2026-10-16)**: 한글원샷은 자기 저장소 `hangeul-oneshot`(https://humanteacher89-cell.github.io/hangeul-oneshot/)으로 분리했다. 이 폴더에는 새 주소로 넘기는 `index.html`과 옛 서비스 워커를 지우는 `sw.js`만 있다. 한글원샷 일은 그 저장소에서 한다 | …/apps/hangeul-oneshot/ → 새 주소 |
+| (목록 링크만) | **공기 분자 실험실**(2026-10-18 목록에 더함): 내 방 공기를 1억 배 키워 손으로 분자를 집고 누르는 WebXR 과학 앱(휴대폰 화면·안드로이드 혼합현실·퀘스트·PC). 코드는 `my-3d-world` 저장소 `air/`(공용 엔진 `vr-core/core.js`)에 있고, 이 저장소에는 `index.html` 목록 한 줄만 있다. 앱 일은 `my-3d-world`에서 한다 | https://humanssaem-world.pages.dev/air/ |
+| (목록 링크만) | **빛과 그림자 실험실**(2026-10-18 목록에 더함, 주황 카드): 손전등·거울로 빛과 그림자를 실험하는 WebXR 과학 앱. 코드는 `my-3d-world` 저장소 `light/`(공기 분자 실험실과 같은 공용 엔진). 앱 일은 `my-3d-world`에서 한다 | https://humanssaem-world.pages.dev/light/ |
+| (목록 링크만) | **물의 상태 변화 실험실 · 손 위의 태양계 · 심장과 폐 탐험실**(2026-10-18 목록에 더함, 파랑 물방울 · 보라 행성 · 빨강 심장 카드): 같은 공용 엔진의 WebXR 과학 앱. 코드는 `my-3d-world` 저장소 `phase/` · `solar/` · `body/`. 앱 일은 `my-3d-world`에서 한다 | https://humanssaem-world.pages.dev/phase/ · …/solar/ · …/body/ |
+| `hangeul-oneshot/` | **옮겨 감(2026-10-16)**: 한글원샷은 자기 저장소 `hangeul-oneshot`으로 분리했다(지금 공개 주소 https://humanssaem-apps.pages.dev/hangeul-oneshot/ — Cloudflare 안에서 자리를 옮기는 중이라 바뀔 수 있다). 이 폴더에는 새 주소로 넘기는 `index.html`과 옛 서비스 워커를 지우는 `sw.js`만 있다. 한글원샷 일은 그 저장소에서 한다 | …/apps/hangeul-oneshot/ → 새 주소 |
 
 ## 지킬 것
 - 앱 하나 = 폴더 하나. 새 앱을 더하면 `index.html` 목록에 한 줄 더한다.
@@ -28,6 +28,7 @@
 - 2026-10-18(클라우드 세션): **한국어 실력 테스트** `korean-test/` 시제품을 새로 만들고 목록에 카드 하나 더함(첫 화면 새 디자인 위에, 보라색 '한')(휴먼쌤 지시, 대상 "해외 한국어 학습자", 자리 "apps 안 폴더"). 문항 20개·결과 문장은 '확인 전' 초안이고 TOPIK 등급이 아니라고 화면에 적음. 학생 정보는 받지 않음.
 - 2026-10-18(클라우드 세션): 목록에 **빛과 그림자 실험실** 카드(주황, 손전등 그림)(휴먼쌤 "빛과 그림자 먼저 올려줘"). `my-3d-world` 저장소 PR(light/)을 먼저 합쳐야 카드 주소가 열린다. 같은 꼴로 물의 상태 변화·손 위의 태양계·심장과 폐 카드가 다음에 더해질 예정.
 - 2026-10-18(클라우드 세션): 목록에 과학 앱 카드 셋(물의 상태 변화 · 손 위의 태양계 · 심장과 폐)(휴먼쌤 "4개 다 해줘", "이어서해줘"). 빛과 그림자 카드 PR 위에 쌓음. `my-3d-world` 앱 PR을 먼저 합쳐야 카드 주소가 열린다.
+- 2026-10-20(PC): GitHub 계정 정지로 공개본을 Cloudflare Pages(humanssaem-apps)로 옮김(다른 창). 거기 올라간 앱 목록은 과학 앱 링크 다섯 개를 humanssaem-world.pages.dev로 바꾼 판이고, 이 저장소 `index.html`은 아직 옛 github.io 링크다(한글원샷 링크와 `hangeul-oneshot/` 넘김 페이지도 옛 주소). 정지 중에는 push하지 않고 커밋만 한다. 이 안내문의 주소도 같은 날 새 주소로 고침.
 - 남은 일: 한국어 실력 테스트는 휴먼쌤이 문항·프랑스어 문장 검토(한글학교 선생님 확인 권장), 듣기 문항·교사용 결과 모으기는 필요하면 다음에(결과 모으기는 학생 정보라 승인 먼저, 서버가 붙으면 저장소 분리 검토). 게임 메이커는 없음(고칠 점이 오면 반영). 한글원샷은 `hangeul-oneshot/CLAUDE.md` '지금 상태와 남은 일'을 본다. 공기 분자 실험실은 `my-3d-world` 저장소 `CLAUDE.md`를 본다.
 
 ## 확인하는 법
