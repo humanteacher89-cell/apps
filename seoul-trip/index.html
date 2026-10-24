@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>서울 하루 여행</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gothic+A1:wght@400;700;800&display=swap">
+<style>
+/* 레이아웃: 위에 아침→저녁 진행 띠와 점수, 가운데 큰 카드 하나(장면·선택지 또는 미션), 끝 화면은 점수·뱃지 카드 + 여행기 쓰기 카드. 색은 오방색(청·적·황)에서 가져옴 */
+:root{
+  --bg:#EEF3F8; --fg:#16202B; --muted:#5C6B7A; --line:#CCD7E2; --face:#FFFFFF; --soft:#E3EAF3;
+  --accent:#2F6BB0; --accent-fg:#FFFFFF; --red:#D9452B; --gold:#E8B429; --gold-fg:#3A2A00;
+  --ok:#2E8B57; --bad:#D1473A; --okbg:#E3F3E9;
+  --display:"Jua","Gothic A1","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111A24; --fg:#EAF0F6; --muted:#A3B1C0; --line:#2E3D4D; --face:#1A2634; --soft:#223042;
+    --accent:#6FA3E0; --accent-fg:#0B1A2A; --red:#F0735C; --gold:#F2C94C; --gold-fg:#2A1F00;
+    --ok:#5CC27E; --bad:#F07A6E; --okbg:#1F3A2A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111A24; --fg:#EAF0F6; --muted:#A3B1C0; --line:#2E3D4D; --face:#1A2634; --soft:#223042;
+  --accent:#6FA3E0; --accent-fg:#0B1A2A; --red:#F0735C; --gold:#F2C94C; --gold-fg:#2A1F00;
+  --ok:#5CC27E; --bad:#F07A6E; --okbg:#1F3A2A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);line-height:1.5;
+  padding-block:12px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+#app{max-width:780px;margin:0 auto;display:grid;gap:14px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(2rem,7vw,3.2rem);margin:0;line-height:1.05;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(1.4rem,4vw,1.9rem);margin:0;line-height:1.15;text-wrap:balance}
+.lead{margin:0;color:var(--muted)}
+.card{background:var(--face);border:1px solid var(--line);border-radius:20px;padding:20px 18px;display:grid;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font-family:var(--display);font-size:1.05rem;border:2px solid var(--line);background:var(--face);color:var(--fg);border-radius:999px;padding:9px 18px;cursor:pointer;line-height:1.1}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.big{font-size:1.35rem;padding:12px 26px;justify-self:start}
+.btn.small{font-size:.95rem;padding:5px 12px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,.opt:focus-visible,.ans:focus-visible,.word:focus-visible,.seg-btn:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+
+/* 시작 화면 */
+.start{text-align:center;justify-items:center}
+.intro{margin:0;max-width:34em;color:var(--muted);font-size:1.05rem}
+.setting{display:grid;gap:6px;justify-items:center;width:100%}
+.s-label{font-family:var(--display);color:var(--muted);letter-spacing:.06em;font-size:.9rem}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:520px}
+.seg.three{grid-template-columns:repeat(3,1fr);max-width:640px}
+@media (max-width:560px){.seg.three{grid-template-columns:1fr}}
+.seg-btn{font-family:var(--display);font-size:1.1rem;border:2px solid var(--line);background:var(--face);color:var(--fg);border-radius:14px;padding:10px 8px;cursor:pointer;line-height:1.15;display:grid;gap:2px}
+.seg-btn small{font-family:var(--body);font-size:.8rem;color:var(--muted)}
+.seg-btn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-fg)}
+.seg-btn[aria-pressed="true"] small{color:var(--accent-fg);opacity:.85}
+.teacher{margin:0;font-size:.9rem;color:var(--muted);max-width:36em}
+.start .btn.big{justify-self:center}
+
+/* 진행 띠 + 점수 */
+.hud{display:grid;gap:8px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stage{background:var(--soft);border-radius:12px;padding:6px 8px;display:grid;gap:2px;min-width:0;border:2px solid transparent}
+.stage.cur{border-color:var(--accent)}
+.stage.done{background:var(--okbg)}
+.st-name{font-family:var(--display);font-size:.95rem;color:var(--muted)}
+.stage.cur .st-name{color:var(--accent)}
+.st-pick{font-size:.85rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score{display:flex;gap:16px;font-family:var(--display);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.score b{font-weight:400;font-size:1.4rem;color:var(--red)}
+
+/* 장면과 선택지 */
+.scene-emoji{font-size:clamp(3rem,10vw,4.6rem);line-height:1;text-align:center}
+.scene-emoji.small{font-size:2.6rem;text-align:left}
+.scene-text{margin:0;font-family:var(--display);font-size:clamp(1.3rem,3.6vw,1.75rem);line-height:1.3;text-align:center;text-wrap:balance}
+.vote-hint{margin:0;text-align:center;color:var(--red);font-family:var(--display)}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.opt{font:inherit;color:inherit;border:2px solid var(--line);background:var(--face);border-radius:16px;padding:14px 10px;cursor:pointer;display:grid;gap:4px;justify-items:center;text-align:center;min-width:0}
+.opt:hover{border-color:var(--accent)}
+.o-emoji{font-size:2.6rem;line-height:1}
+.o-label{font-family:var(--display);font-size:1.4rem;line-height:1.1}
+.o-desc{font-size:.9rem;color:var(--muted)}
+.o-votes{font-family:var(--display);font-size:1.3rem;color:var(--red);margin-top:4px}
+
+/* 미션 */
+.result-text{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center}
+.result-text p{margin:0;font-size:1.1rem;font-weight:700}
+.mission{border:2px solid var(--gold);border-radius:16px;padding:14px;display:grid;gap:10px;background:var(--soft)}
+.m-label{font-family:var(--display);color:var(--gold-fg);background:var(--gold);border-radius:999px;padding:3px 12px;justify-self:start;font-size:.95rem}
+.m-q{margin:0;font-size:1.15rem;font-weight:700}
+.hint{margin:0;color:var(--muted);font-size:1rem;background:var(--face);border-radius:10px;padding:6px 10px;justify-self:start}
+.answers{display:grid;gap:8px}
+.ans{font-family:var(--display);font-size:clamp(1.15rem,3.2vw,1.5rem);text-align:left;border:2px solid var(--line);background:var(--face);color:var(--fg);border-radius:12px;padding:12px 14px;cursor:pointer;line-height:1.2}
+.ans:hover:not(:disabled){border-color:var(--accent)}
+.ans:disabled{opacity:.55;cursor:default}
+.ans.right{border-color:var(--ok);background:var(--okbg);opacity:1}
+.order{display:grid;gap:10px}
+.answer-line{min-height:3.2em;border:2px dashed var(--accent);border-radius:12px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--face)}
+.placeholder{color:var(--muted);font-size:.95rem}
+.word-bank{display:flex;flex-wrap:wrap;gap:8px}
+.word{font-family:var(--display);font-size:1.3rem;border:2px solid var(--accent);background:var(--face);color:var(--accent);border-radius:999px;padding:6px 16px;cursor:pointer;line-height:1.1}
+.word.picked{background:var(--accent);color:var(--accent-fg)}
+.word:disabled{opacity:.3;cursor:default}
+.feedback{margin:0;font-family:var(--display);font-size:1.15rem;min-height:1.4em}
+.feedback.good{color:var(--ok)} .feedback.so{color:var(--bad)}
+.culture{margin:0;background:var(--face);border-left:5px solid var(--gold);border-radius:0 10px 10px 0;padding:8px 12px;font-size:.98rem}
+
+/* 끝 화면 */
+.end{text-align:center;justify-items:center}
+.final-score{font-family:var(--display);font-size:4rem;line-height:1;color:var(--red);font-variant-numeric:tabular-nums}
+.final-score span{font-size:1.5rem;margin-left:4px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.badge{display:grid;justify-items:center;gap:2px;border:2px solid var(--line);border-radius:14px;padding:8px 10px;min-width:92px;font-family:var(--display);font-size:.9rem;opacity:.35}
+.badge span:first-child{font-size:1.8rem;line-height:1}
+.badge.on{opacity:1;border-color:var(--gold);background:var(--face);box-shadow:0 0 0 3px var(--gold)}
+.path{margin:0;font-size:1.05rem;font-weight:700}
+.diary{display:grid;gap:8px}
+.diary-line{font:inherit;font-size:1.1rem;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:var(--face);color:var(--fg);width:100%}
+.diary-line:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.composed{display:grid;gap:10px;background:var(--soft);border-radius:16px;padding:16px}
+.composed p{margin:0;font-family:var(--display);font-size:clamp(1.3rem,3.6vw,1.8rem);line-height:1.45;white-space:pre-line}
+.vbox{max-width:780px;margin:14px auto 0;display:grid;gap:6px;justify-items:center;text-align:center}
+.note{margin:0;color:var(--muted);font-size:.85rem}
+.note.alert{color:var(--bad);font-weight:700}
+.vhelp{font-size:.85rem;color:var(--muted);text-align:left}
+.vhelp summary{cursor:pointer;font-family:var(--display);color:var(--fg);font-size:.95rem;text-align:center}
+.vhelp ul{margin:6px 0 0;padding-left:18px;display:grid;gap:4px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<main id="app"></main>
+<div class="vbox">
+  <button type="button" class="btn small" id="voiceTest">🔊 소리 확인</button>
+  <p class="note" id="voiceNote" aria-live="polite">🔊는 이 기기에 들어 있는 한국어 음성으로 읽어요. 수업 전에 '소리 확인'을 한 번 눌러 보세요.</p>
+  <details class="vhelp">
+    <summary>소리가 안 나요?</summary>
+    <ul>
+      <li>🔊는 기기에 설치된 한국어 음성을 써요. 한국어 음성이 없거나 앱이 음성 읽기를 막으면 소리가 안 나요.</li>
+      <li>가장 간단한 방법: 링크를 복사해서 Chrome이나 Edge 브라우저에서 열기. 두 브라우저에는 한국어 음성이 들어 있어요.</li>
+      <li>휴대폰: 아이폰은 Safari, 안드로이드는 Chrome 앱에서 링크 열기. 무음 모드와 음량을 확인해요.</li>
+      <li>Windows에 음성 설치: 설정 → 시간 및 언어 → 언어 → 언어 추가 → 한국어(음성 합성 포함) → 앱 다시 열기</li>
+      <li>Mac에 음성 설치: 시스템 설정 → 손쉬운 사용 → 읽어주기 → 시스템 음성 → 관리 → 한국어 내려받기</li>
+      <li>그래도 안 되면 선생님이 직접 읽어 주세요. 게임은 소리 없이도 다 돼요.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+// ===== 여기만 바꾸면 됩니다 =====
+const GAME = {
+  title: "서울 하루 여행",
+  intro: "오늘 하루, 서울을 여행해요. 갈림길마다 친구들과 함께 고르고, 한국어 미션을 풀면 점수와 뱃지를 받아요.",
+  stages: ["아침", "점심", "오후", "저녁"],
+  badges: {
+    order:   { name: "주문 달인", emoji: "🍽️" },
+    move:    { name: "길찾기 달인", emoji: "🧭" },
+    talk:    { name: "말하기 달인", emoji: "💬" },
+    manners: { name: "예의 바른 여행자", emoji: "🙇" },   // 미션 3개 이상 한 번에 성공
+    finish:  { name: "서울 완주", emoji: "🏅" }
+  },
+  // 수준: hint = always(항상 보임) / button(버튼) / none(없음, 두 번 틀리면 나옴). bonus = 한 번에 맞혔을 때 더 주는 점수
+  levels: {
+    basic: { name: "초급", desc: "프랑스어 힌트가 항상 보여요", hint: "always", bonus: 0 },
+    mid:   { name: "중급", desc: "힌트는 버튼을 눌러야 보여요", hint: "button", bonus: 0 },
+    adv:   { name: "고급", desc: "보기 4개, 긴 문장, 힌트 없음 (한 번에 맞히면 15점)", hint: "none", bonus: 5 }
+  },
+  // 갈림길(장면)마다 선택지. mission.type: "choice"(3지선다, answer = 맞는 번호, extra = 고급에서 더해지는 4번째 보기)
+  // 또는 "order"(단어 순서 맞추기, words = 맞는 순서, wordsLong = 고급용 긴 문장)
+  scenes: [
+    { emoji: "🌅", text: "아침 8시, 서울에서 하루가 시작돼요. 어디부터 갈까요?",
+      options: [
+        { label: "경복궁", emoji: "🏯", desc: "한복 입고 궁궐 구경",
+          result: "경복궁에 왔어요. 한복을 입으면 입장이 무료예요! 매표소에서 표를 사요.",
+          culture: "경복궁은 조선 시대 왕이 살던 궁궐이에요. 한복을 입으면 공짜로 들어갈 수 있어요.",
+          diary: "경복궁에서 한복을 입었어요",
+          mission: { type: "choice", q: "매표소 직원에게 표 두 장을 달라고 말해요. 뭐라고 할까요?", hint: "Deux billets, s'il vous plaît.",
+                     options: ["표 두 장 주세요.", "표 두 장 먹어요.", "표 두 장 가요."], extra: "표 두 장 줬어요.", answer: 0, badge: "order" } },
+        { label: "남산타워", emoji: "🗼", desc: "서울 전체 내려다보기",
+          result: "남산에 왔어요. 꼭대기까지 케이블카를 타고 올라가요.",
+          culture: "남산타워 전망대에서는 서울이 한눈에 보여요. 사랑의 자물쇠도 유명해요.",
+          diary: "남산타워에서 서울을 내려다봤어요",
+          mission: { type: "order", q: "단어를 순서대로 눌러 문장을 만들어요.", hint: "On monte en téléphérique.",
+                     words: ["케이블카", "타고", "올라가요"], wordsLong: ["케이블카", "타고", "꼭대기까지", "올라가고", "싶어요"], badge: "move" } },
+        { label: "광장시장", emoji: "🥞", desc: "아침부터 맛있는 냄새",
+          result: "광장시장이에요. 빈대떡 냄새가 솔솔 나요. 아주머니께 주문해요.",
+          culture: "빈대떡은 녹두를 갈아서 부친 전이에요. 광장시장 빈대떡은 100년 넘게 유명해요.",
+          diary: "광장시장에서 빈대떡을 먹었어요",
+          mission: { type: "choice", q: "빈대떡 하나를 주문해요. 뭐라고 할까요?", hint: "Un bindaetteok, s'il vous plaît.",
+                     options: ["빈대떡 하나 주세요.", "빈대떡 하나 봐요.", "빈대떡 하나 자요."], extra: "빈대떡 하나 줬어요.", answer: 0, badge: "order" } }
+      ] },
+    { emoji: "🍽️", text: "벌써 12시! 배가 고파요. 점심은 뭘 먹을까요?",
+      options: [
+        { label: "떡볶이", emoji: "🌶️", desc: "빨갛고 매운 떡",
+          result: "분식집에 왔어요. 떡볶이가 빨개요. 매운 걸 잘 못 먹으면 미리 말해야 해요.",
+          culture: "떡볶이는 한국 아이들이 제일 좋아하는 간식이에요. 가게마다 맵기가 달라요.",
+          diary: "점심에 떡볶이를 먹었어요",
+          mission: { type: "choice", q: "매운 걸 잘 못 먹어요. 뭐라고 부탁할까요?", hint: "Pas trop épicé, s'il vous plaît.",
+                     options: ["안 맵게 해 주세요.", "많이 맵게 해 주세요.", "안 먹어요."], extra: "맵게 해 주세요.", answer: 0, badge: "order" } },
+        { label: "비빔밥", emoji: "🍚", desc: "알록달록 야채와 밥",
+          result: "한식당이에요. 비빔밥을 시키고 고추장을 넣어 쓱쓱 비벼요.",
+          culture: "비빔밥은 '비비다'에서 온 말이에요. 밥, 나물, 계란, 고추장을 한 그릇에 비벼 먹어요.",
+          diary: "점심에 비빔밥을 먹었어요",
+          mission: { type: "order", q: "단어를 순서대로 눌러 주문해요.", hint: "Un bibimbap, s'il vous plaît.",
+                     words: ["비빔밥", "하나", "주세요"], wordsLong: ["비빔밥", "하나하고", "물", "한 잔", "주세요"], badge: "order" } },
+        { label: "냉면", emoji: "🍜", desc: "여름엔 시원한 국수",
+          result: "냉면집이에요. 면이 길어서 가위로 잘라 먹어요. 그런데 가위가 없네요!",
+          culture: "한국 식당에서는 가위로 면이나 고기를 잘라요. 처음 보는 프랑스 친구들은 깜짝 놀라요.",
+          diary: "점심에 시원한 냉면을 먹었어요",
+          mission: { type: "choice", q: "면을 자르고 싶어요. 뭐라고 부탁할까요?", hint: "Des ciseaux, s'il vous plaît.",
+                     options: ["가위 좀 주세요.", "가위 좀 먹어요.", "가위 좀 가요."], extra: "가위 좀 줬어요.", answer: 0, badge: "talk" } }
+      ] },
+    { emoji: "☀️", text: "오후 3시. 배도 부르고 힘이 나요. 뭘 할까요?",
+      options: [
+        { label: "한강 자전거", emoji: "🚲", desc: "강바람 맞으며 씽씽",
+          result: "한강 공원이에요. 자전거를 빌려서 강을 따라 달려요.",
+          culture: "한강 공원에서는 자전거를 빌리고, 돗자리를 깔고 치킨을 시켜 먹기도 해요.",
+          diary: "한강에서 자전거를 탔어요",
+          mission: { type: "order", q: "단어를 순서대로 눌러 말해요.", hint: "Je voudrais louer un vélo.",
+                     words: ["자전거", "빌리고", "싶어요"], wordsLong: ["자전거", "한 시간", "빌리고", "싶은데", "얼마예요?"], badge: "move" } },
+        { label: "홍대", emoji: "🎤", desc: "길거리 K-팝 댄스",
+          result: "홍대에 가려고 해요. 그런데 길을 잘 모르겠어요. 지나가는 사람에게 물어봐요.",
+          culture: "홍대 거리에서는 주말마다 노래와 춤 공연을 볼 수 있어요.",
+          diary: "홍대에서 춤 공연을 봤어요",
+          mission: { type: "choice", q: "홍대입구역이 어디인지 물어봐요. 뭐라고 할까요?", hint: "Où est la station Hongik Univ. ?",
+                     options: ["홍대입구역이 어디예요?", "홍대입구역이 얼마예요?", "홍대입구역이 몇 시예요?"], extra: "홍대입구역이 언제예요?", answer: 0, badge: "move" } },
+        { label: "인사동", emoji: "🎁", desc: "기념품 사기",
+          result: "인사동 거리예요. 예쁜 부채와 한글 엽서가 많아요. 가격을 물어봐요.",
+          culture: "인사동에는 한국 전통 물건을 파는 가게가 많아요. 간판도 한글로 써요.",
+          diary: "인사동에서 기념품을 샀어요",
+          mission: { type: "choice", q: "부채 가격을 물어봐요. 뭐라고 할까요?", hint: "C'est combien ?",
+                     options: ["이거 얼마예요?", "이거 몇 시예요?", "이거 어디예요?"], extra: "이거 몇 개예요?", answer: 0, badge: "talk" } }
+      ] },
+    { emoji: "🌙", text: "저녁 7시. 하루 종일 걸어서 다리가 아파요. 마지막으로 어디에 갈까요?",
+      options: [
+        { label: "편의점", emoji: "🏪", desc: "삼각김밥과 바나나우유",
+          result: "편의점이에요. 삼각김밥과 바나나우유를 골랐어요. 계산대에서 말해요.",
+          culture: "한국 편의점은 24시간 열려 있고, 안에서 라면을 끓여 먹을 수도 있어요.",
+          diary: "저녁에 편의점에서 삼각김밥을 먹었어요",
+          mission: { type: "order", q: "단어를 순서대로 눌러 말해요.", hint: "Deux kimbap triangles, s'il vous plaît.",
+                     words: ["삼각김밥", "두 개", "주세요"], wordsLong: ["삼각김밥", "두 개하고", "바나나우유", "하나", "주세요"], badge: "order" } },
+        { label: "찜질방", emoji: "🧖", desc: "뜨끈한 방에서 쉬기",
+          result: "찜질방이에요. 수건으로 양머리를 만들고 뜨거운 방에 들어갔어요. 앗, 너무 뜨거워요!",
+          culture: "찜질방은 한국식 사우나예요. 수건을 양 머리 모양으로 접어 쓰고, 구운 계란과 식혜를 먹어요.",
+          diary: "저녁에 찜질방에서 쉬었어요",
+          mission: { type: "choice", q: "방이 너무 뜨거워요. 뭐라고 말할까요?", hint: "C'est trop chaud !",
+                     options: ["너무 뜨거워요.", "너무 추워요.", "너무 매워요."], extra: "너무 뜨거웠어요.", answer: 0, badge: "talk" } }
+      ] }
+  ],
+  // 여행기 문장 틀. {0}~{3}은 아침~저녁에 고른 곳의 diary 문장으로 바뀌어요
+  diaryFrames: ["아침에 {0}.", "{1}.", "오후에 {2}.", "{3}.", "제일 재미있었던 것은 ____이에요."]
+};
+const POINTS_FIRST = 10, POINTS_RETRY = 5, MANNERS_NEED = 3;
+// ================================
+
+const $ = (s) => document.querySelector(s);
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function shuffle(a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+/* ---------- 소리 (기기의 한국어 음성 사용) ---------- */
+const UA = navigator.userAgent || "";
+const PLATFORM = /iPhone|iPad|iPod/.test(UA) ? "ios" : /Android/.test(UA) ? "android" : /Windows/.test(UA) ? "windows" : /Mac/.test(UA) ? "mac" : "other";
+const TIPS = {
+  ios: "아이폰·아이패드라면 같은 링크를 Safari에서 열어 보세요. 옆면 무음 스위치가 켜져 있으면 소리가 안 나요.",
+  android: "안드로이드라면 같은 링크를 Chrome 앱에서 열어 보세요. Claude 앱 화면 안에서는 음성 읽기가 안 돼요.",
+  windows: "윈도우라면 같은 링크를 Edge나 Chrome에서 열어 보세요. 두 브라우저에는 한국어 음성이 들어 있어요.",
+  mac: "맥이라면 같은 링크를 Chrome에서 열어 보세요. 또는 시스템 설정 → 손쉬운 사용 → 읽어주기에서 한국어 음성을 내려받아요.",
+  other: "같은 링크를 Chrome 브라우저에서 열어 보세요."
+};
+let KO_VOICE = null, voicesReady = false;
+function findKoVoice(){
+  try{
+    const vs = speechSynthesis.getVoices();
+    if (vs.length) voicesReady = true;
+    KO_VOICE = vs.find(v => v.lang && v.lang.toLowerCase().replace("_", "-").startsWith("ko")) || null;
+  }catch(e){}
+  return KO_VOICE;
+}
+function voiceNote(msg, alert){ const n = $("#voiceNote"); if (!n) return; n.textContent = msg; n.classList.toggle("alert", !!alert); }
+function voiceStatus(){
+  if (!("speechSynthesis" in window)){ voiceNote("이 앱에서는 소리 읽기를 쓸 수 없어요. " + TIPS[PLATFORM], true); return; }
+  const v = findKoVoice();
+  if (v) voiceNote("🔊 한국어 음성 준비됨 (" + v.name + "). 수업 전에 '소리 확인'을 한 번 눌러 보세요.");
+  else if (voicesReady) voiceNote("이 기기에 한국어 음성이 없어요. " + TIPS[PLATFORM], true);
+}
+if ("speechSynthesis" in window){
+  voiceStatus();
+  try{ speechSynthesis.addEventListener("voiceschanged", voiceStatus); }catch(e){}
+  setTimeout(() => { if (!voicesReady){ findKoVoice(); if (!voicesReady) voiceNote("음성 목록을 받지 못했어요. 이 앱이 음성 읽기를 막는 것 같아요. " + TIPS[PLATFORM], true); } }, 2500);
+} else { voiceStatus(); }
+function speak(text){
+  if (!("speechSynthesis" in window)){ voiceNote("이 앱에서는 소리 읽기를 쓸 수 없어요. " + TIPS[PLATFORM], true); return; }
+  const v = findKoVoice();
+  try{
+    const u = new SpeechSynthesisUtterance(text); u.lang = "ko-KR"; u.rate = 0.85;
+    if (v) u.voice = v;
+    u.onerror = (e) => { if (e && e.error === "interrupted") return; voiceNote("소리를 내지 못했어요 (" + ((e && e.error) || "오류") + "). " + TIPS[PLATFORM], true); };
+    if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+    if (!v) voiceNote((voicesReady ? "한국어 음성이 없어서 소리가 안 날 수 있어요. " : "음성 목록을 아직 못 받았어요. ") + TIPS[PLATFORM], true);
+  }catch(e){ voiceNote("소리를 내지 못했어요. " + TIPS[PLATFORM], true); }
+}
+$("#voiceTest").addEventListener("click", () => speak("안녕하세요"));
+
+/* ---------- 상태 ---------- */
+const S = { phase: "start", level: "basic", vote: false, scene: 0, chosen: [], votes: [], score: 0, badges: [], firstTries: 0, mission: null, diary: null };
+function resetGame(){ Object.assign(S, { phase: "start", scene: 0, chosen: [], votes: [], score: 0, badges: [], firstTries: 0, mission: null, diary: null }); }
+const curScene = () => GAME.scenes[S.scene];
+const curOpt = () => curScene().options[S.chosen[S.scene]];
+
+/* ---------- 화면 조각 ---------- */
+function startHTML(){
+  return `<section class="card start">
+    <div class="scene-emoji">🗺️</div>
+    <h1>${esc(GAME.title)}</h1>
+    <p class="intro">${esc(GAME.intro)}</p>
+    <div class="setting"><div class="s-label">수준</div><div class="seg three">
+      ${Object.keys(GAME.levels).map(k => `<button type="button" class="seg-btn" id="lv-${k}" data-action="setLevel" data-v="${k}" aria-pressed="${S.level === k}">${esc(GAME.levels[k].name)}<small>${esc(GAME.levels[k].desc)}</small></button>`).join("")}
+    </div></div>
+    <div class="setting"><div class="s-label">진행 방식</div><div class="seg">
+      <button type="button" class="seg-btn" id="md-solo" data-action="setVote" data-v="0" aria-pressed="${!S.vote}">혼자 하기<small>고르면 바로 출발</small></button>
+      <button type="button" class="seg-btn" id="md-vote" data-action="setVote" data-v="1" aria-pressed="${S.vote}">반 전체 투표<small>손 든 수를 세고 출발</small></button>
+    </div></div>
+    <button type="button" class="btn primary big" data-action="startGame">여행 시작!</button>
+    <p class="teacher">선생님께: 프로젝터로 띄우고 '반 전체 투표'를 고르면, 갈림길마다 아이들이 손을 들고 선생님이 선택지를 눌러 수를 세요. 링크 끝에 #basic, #mid, #adv를 붙이면 그 수준이 미리 골라진 채로 열려요.</p>
+  </section>`;
+}
+function hudHTML(){
+  return `<div class="hud">
+    <div class="strip">${GAME.stages.map((st, i) => {
+      const c = S.chosen[i];
+      const done = c !== undefined && !(i === S.scene && S.phase === "choice");
+      const cur = i === S.scene && S.phase !== "end";
+      const o = done ? GAME.scenes[i].options[c] : null;
+      return `<div class="stage${cur ? " cur" : ""}${done ? " done" : ""}"><span class="st-name">${esc(st)}</span><span class="st-pick">${o ? esc(o.emoji + " " + o.label) : "·"}</span></div>`;
+    }).join("")}</div>
+    <div class="score"><span>점수 <b>${S.score}</b></span><span>뱃지 <b>${S.badges.length}</b>/${Object.keys(GAME.badges).length}</span></div>
+  </div>`;
+}
+function choiceHTML(){
+  const sc = curScene();
+  return `<section class="card">
+    <div class="scene-emoji">${esc(sc.emoji)}</div>
+    <p class="scene-text">${esc(sc.text)}</p>
+    ${S.vote ? `<p class="vote-hint">✋ 손 든 사람 수만큼 선택지를 눌러요. 다 세면 '출발!'</p>` : ""}
+    <div class="options">${sc.options.map((o, i) => `<button type="button" class="opt" id="opt-${i}" data-action="pick" data-i="${i}">
+      <span class="o-emoji">${esc(o.emoji)}</span><span class="o-label">${esc(o.label)}</span><span class="o-desc">${esc(o.desc)}</span>
+      ${S.vote ? `<span class="o-votes">✋ ${S.votes[i] || 0}</span>` : ""}</button>`).join("")}</div>
+    ${S.vote ? `<div class="row"><button type="button" class="btn" data-action="voteReset">다시 세기</button><button type="button" class="btn primary" data-action="voteGo">가장 많은 표로 출발!</button></div>` : ""}
+  </section>`;
+}
+function missionOptions(m){ return S.level === "adv" && m.extra ? m.options.concat([m.extra]) : m.options; }
+function missionWords(m){ return S.level === "adv" && m.wordsLong ? m.wordsLong : m.words; }
+function hintHTML(ms){
+  if (ms.hint) return `<p class="hint">🇫🇷 ${esc(curOpt().mission.hint)}</p>`;
+  if (GAME.levels[S.level].hint === "none") return `<p class="hint">힌트 없음 · 두 번 틀리면 힌트가 나와요</p>`;
+  return `<div class="row"><button type="button" class="btn small" data-action="hint">힌트 보기</button></div>`;
+}
+function missionHTML(){
+  const opt = curOpt(), m = opt.mission, ms = S.mission;
+  const opts = missionOptions(m);
+  let body;
+  if (m.type === "choice"){
+    body = `<div class="answers">${ms.perm.map((oi, i) => `<button type="button" class="ans${ms.done && oi === m.answer ? " right" : ""}" id="ans-${i}" data-action="answer" data-i="${i}" ${ms.done ? "disabled" : ""}>${esc(opts[oi])}</button>`).join("")}</div>`;
+  } else {
+    const used = new Set(ms.picked);
+    body = `<div class="order">
+      <div class="answer-line" id="answerLine">${ms.picked.length ? ms.picked.map((k, idx) => `<button type="button" class="word picked" data-action="unpick" data-k="${idx}" ${ms.done ? "disabled" : ""}>${esc(ms.perm[k])}</button>`).join("") : `<span class="placeholder">여기에 단어가 순서대로 들어가요</span>`}</div>
+      <div class="word-bank">${ms.perm.map((w, i) => `<button type="button" class="word" id="word-${i}" data-action="pickWord" data-i="${i}" ${used.has(i) || ms.done ? "disabled" : ""}>${esc(w)}</button>`).join("")}</div>
+      ${ms.done ? "" : `<div class="row"><button type="button" class="btn primary" data-action="checkOrder" ${ms.picked.length !== ms.perm.length ? "disabled" : ""}>확인</button></div>`}
+    </div>`;
+  }
+  const last = S.scene >= GAME.scenes.length - 1;
+  return `<section class="card">
+    <div class="result-text"><span class="scene-emoji small">${esc(opt.emoji)}</span><p>${esc(opt.result)}</p></div>
+    <div class="mission">
+      <span class="m-label">한국어 미션</span>
+      <p class="m-q">${esc(m.q)}</p>
+      ${hintHTML(ms)}
+      ${body}
+      <p class="feedback ${ms.done ? "good" : "so"}" aria-live="polite">${esc(ms.feedback)}</p>
+      ${ms.done ? `<div class="row"><button type="button" class="btn small" data-action="sayAnswer">🔊 정답 듣기</button></div><p class="culture">💡 ${esc(opt.culture)}</p><button type="button" class="btn primary big" data-action="next">${last ? "하루 마무리 →" : "계속 →"}</button>` : ""}
+    </div>
+  </section>`;
+}
+function endHTML(){
+  const path = S.chosen.map((c, i) => GAME.scenes[i].options[c]);
+  return `<section class="card end">
+    <h2>하루가 끝났어요! 🎉</h2>
+    <div class="final-score">${S.score}<span>점</span></div>
+    <div class="badges">${Object.keys(GAME.badges).map(k => `<div class="badge${S.badges.includes(k) ? " on" : ""}"><span>${esc(GAME.badges[k].emoji)}</span><span>${esc(GAME.badges[k].name)}</span></div>`).join("")}</div>
+    <p class="path">오늘의 길: ${path.map(o => esc(o.emoji + " " + o.label)).join(" → ")}</p>
+  </section>
+  <section class="card">
+    <h2>나의 서울 여행기</h2>
+    <p class="lead">문장을 그대로 두거나 고쳐 쓰고, 마지막 줄의 ____를 채워요. '여행기 완성'을 누른 뒤 큰 소리로 읽어요.</p>
+    <div class="diary">${S.diary.map((t, i) => `<input type="text" class="diary-line" id="diary-${i}" value="${esc(t)}" aria-label="여행기 ${i + 1}번째 문장">`).join("")}</div>
+    <div class="row"><button type="button" class="btn primary" data-action="compose">여행기 완성</button></div>
+    <div id="composed" class="composed" hidden></div>
+    <div class="row"><button type="button" class="btn" data-action="restart">다른 길로 다시 여행하기</button></div>
+  </section>`;
+}
+function render(){
+  const app = $("#app");
+  if (S.phase === "start") app.innerHTML = startHTML();
+  else if (S.phase === "choice") app.innerHTML = hudHTML() + choiceHTML();
+  else if (S.phase === "mission") app.innerHTML = hudHTML() + missionHTML();
+  else app.innerHTML = hudHTML() + endHTML();
+  const key = S.phase + ":" + S.scene;
+  if (key !== lastKey) window.scrollTo({ top: 0 });
+  lastKey = key;
+}
+let lastKey = "";
+
+/* ---------- 동작 ---------- */
+function answerText(){
+  const m = curOpt().mission;
+  if (m.type === "choice") return m.options[m.answer];
+  const s = missionWords(m).join(" ");
+  return /[.?!]$/.test(s) ? s : s + ".";
+}
+function choose(i){
+  const m = curScene().options[i].mission;
+  S.chosen[S.scene] = i;
+  S.mission = {
+    attempts: 0, done: false, feedback: "", hint: GAME.levels[S.level].hint === "always",
+    perm: m.type === "choice" ? shuffle(missionOptions(m).map((_, k) => k)) : shuffle(missionWords(m).slice()),
+    picked: []
+  };
+  S.phase = "mission"; render();
+}
+function success(){
+  const ms = S.mission, m = curOpt().mission;
+  const pts = ms.attempts === 0 ? POINTS_FIRST + (GAME.levels[S.level].bonus || 0) : POINTS_RETRY;
+  S.score += pts; ms.done = true;
+  if (ms.attempts === 0){
+    S.firstTries++;
+    if (m.badge && !S.badges.includes(m.badge)) S.badges.push(m.badge);
+  }
+  const newBadge = ms.attempts === 0 && m.badge && GAME.badges[m.badge] ? ` ${GAME.badges[m.badge].emoji} '${GAME.badges[m.badge].name}' 뱃지!` : "";
+  ms.feedback = `정답! +${pts}점${newBadge} 다 같이 한 번 읽어 봐요: ${answerText()}`;
+  render();
+}
+function fail(){
+  const ms = S.mission; ms.attempts++;
+  const showHint = GAME.levels[S.level].hint !== "none" || ms.attempts >= 2;
+  ms.feedback = showHint ? "다시 생각해 보세요. 힌트를 보고 골라도 돼요." : "다시 생각해 보세요. 한 번 더 틀리면 힌트가 나와요.";
+  ms.hint = showHint; ms.picked = []; render();
+}
+const actions = {
+  setLevel(el){ S.level = el.dataset.v; render(); },
+  setVote(el){ S.vote = el.dataset.v === "1"; render(); },
+  startGame(){ S.phase = "choice"; S.scene = 0; S.chosen = []; S.votes = []; S.score = 0; S.badges = []; S.firstTries = 0; render(); },
+  pick(el){
+    const i = Number(el.dataset.i);
+    if (S.vote){ S.votes[i] = (S.votes[i] || 0) + 1; render(); } else choose(i);
+  },
+  voteReset(){ S.votes = []; render(); },
+  voteGo(){
+    const n = curScene().options.length; let best = 0;
+    for (let i = 1; i < n; i++) if ((S.votes[i] || 0) > (S.votes[best] || 0)) best = i;
+    S.votes = []; choose(best);
+  },
+  hint(){ S.mission.hint = true; render(); },
+  answer(el){
+    const ms = S.mission; if (ms.done) return;
+    const m = curOpt().mission;
+    if (ms.perm[Number(el.dataset.i)] === m.answer) success(); else fail();
+  },
+  pickWord(el){ const ms = S.mission; if (ms.done) return; ms.picked.push(Number(el.dataset.i)); render(); },
+  unpick(el){ const ms = S.mission; if (ms.done) return; ms.picked.splice(Number(el.dataset.k), 1); render(); },
+  checkOrder(){
+    const ms = S.mission, m = curOpt().mission;
+    if (ms.picked.map(k => ms.perm[k]).join(" ") === missionWords(m).join(" ")) success(); else fail();
+  },
+  sayAnswer(){ speak(answerText()); },
+  next(){
+    if (S.scene < GAME.scenes.length - 1){ S.scene++; S.votes = []; S.mission = null; S.phase = "choice"; render(); return; }
+    if (!S.badges.includes("finish")) S.badges.push("finish");
+    if (S.firstTries >= MANNERS_NEED && !S.badges.includes("manners")) S.badges.push("manners");
+    const path = S.chosen.map((c, i) => GAME.scenes[i].options[c]);
+    S.diary = GAME.diaryFrames.map(f => f.replace(/\{(\d)\}/g, (_, n) => path[Number(n)] ? path[Number(n)].diary : ""));
+    S.phase = "end"; render();
+  },
+  compose(){
+    const lines = Array.from(document.querySelectorAll(".diary-line")).map(i => i.value.trim()).filter(Boolean);
+    S.diary = Array.from(document.querySelectorAll(".diary-line")).map(i => i.value);
+    const text = lines.join("\n");
+    const box = $("#composed");
+    box.innerHTML = `<p id="composedText">${esc(text)}</p><div class="row"><button type="button" class="btn" data-action="sayDiary">🔊 듣기</button><button type="button" class="btn" data-action="copyDiary" id="copyBtn">복사하기</button></div>`;
+    box.hidden = false;
+  },
+  sayDiary(){ const t = $("#composedText"); if (t) speak(t.textContent); },
+  copyDiary(){
+    const t = $("#composedText"); if (!t) return;
+    const done = () => { $("#copyBtn").textContent = "복사했어요!"; };
+    const fallback = () => { try{ const r = document.createRange(); r.selectNodeContents(t); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); $("#copyBtn").textContent = "글을 길게 눌러 복사하세요"; }catch(e){} };
+    try{ navigator.clipboard.writeText(t.textContent).then(done, fallback); }catch(e){ fallback(); }
+  },
+  restart(){ resetGame(); render(); }
+};
+$("#app").addEventListener("click", e => {
+  const el = e.target.closest("[data-action]"); if (!el || el.disabled) return;
+  const fn = actions[el.dataset.action]; if (fn) fn(el);
+});
+
+/* ---------- 시작 (화면이 새로 올라와도 진행 상황 유지) ---------- */
+function boot(data){
+  try{ if (data && data.phase && data.chosen) Object.assign(S, data); }catch(e){}
+  const h = location.hash.replace("#", "");
+  if (GAME.levels[h] && S.phase === "start") S.level = h;
+  if (!GAME.levels[S.level]) S.level = Object.keys(GAME.levels)[0];
+  render();
+}
+try{
+  const hot = window.claude && window.claude.hot;
+  if (hot && hot.snapshot) hot.snapshot(() => S);
+  if (hot && hot.ready) hot.ready(boot); else boot(hot ? hot.data : null);
+}catch(e){ if (!$("#app").innerHTML) boot(null); }
+</script>

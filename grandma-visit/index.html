@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>할머니 댁에 도착했어요</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gothic+A1:wght@400;700;800&display=swap">
+<style>
+/* 레이아웃: 위에 제목·상황 소개·수준 버튼·4단계 탭, 아래에 한 번에 한 단계씩 보이는 패널. 대화는 말하는 사람 칩 + 글 + 🔊 세 칸 */
+:root{
+  --bg:#F5F2F8; --fg:#241F33; --muted:#6A6378; --line:#D9D2E3; --face:#FFFFFF; --soft:#ECE6F3;
+  --accent:#7A3E9D; --accent-fg:#FFFFFF;
+  --role0:#F4B07C; --role0-fg:#3A1F08; --role1:#8EC3E3; --role1-fg:#0B2A3A;
+  --ok:#2E8B57; --bad:#D1473A; --okbg:#E3F3E9; --badbg:#FBE4E1;
+  --display:"Jua","Gothic A1","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1A1724; --fg:#EFEAF5; --muted:#ADA5BB; --line:#3A3449; --face:#262134; --soft:#2F2940;
+    --accent:#B88BD1; --accent-fg:#1A1024;
+    --role0:#E09A62; --role0-fg:#2A1606; --role1:#6FA8CC; --role1-fg:#07202E;
+    --ok:#5CC27E; --bad:#F07A6E; --okbg:#1F3A2A; --badbg:#44252A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1A1724; --fg:#EFEAF5; --muted:#ADA5BB; --line:#3A3449; --face:#262134; --soft:#2F2940;
+  --accent:#B88BD1; --accent-fg:#1A1024;
+  --role0:#E09A62; --role0-fg:#2A1606; --role1:#6FA8CC; --role1-fg:#07202E;
+  --ok:#5CC27E; --bad:#F07A6E; --okbg:#1F3A2A; --badbg:#44252A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);line-height:1.5;
+  padding-block:12px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:840px;margin:0 auto;display:grid;gap:16px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(1.7rem,5vw,2.5rem);margin:0;line-height:1.1;text-wrap:balance}
+.intro{margin:6px 0 0;color:var(--muted);font-size:1rem}
+h2{font-family:var(--display);font-weight:400;font-size:1.4rem;margin:0 0 4px}
+.lead{margin:0 0 12px;color:var(--muted)}
+.head-row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:10px}
+.levels{display:flex;gap:6px;flex-wrap:wrap}
+.lv{font-family:var(--display);font-size:1rem;border:2px solid var(--line);background:var(--face);color:var(--fg);border-radius:12px;padding:6px 12px;cursor:pointer;line-height:1.1;display:grid;gap:1px;text-align:center}
+.lv small{font-family:var(--body);font-size:.72rem;color:var(--muted)}
+.lv[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.lv[aria-pressed="true"] small{color:var(--accent-fg);opacity:.85}
+
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:560px){.tabs{grid-template-columns:repeat(2,1fr)}}
+.tab{font-family:var(--display);font-size:1.05rem;border:2px solid var(--line);background:var(--face);color:var(--fg);border-radius:14px;padding:10px 8px;cursor:pointer;line-height:1.15;text-align:center}
+.tab .n{display:block;font-size:.8rem;color:var(--muted);letter-spacing:.06em}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.tab[aria-selected="true"] .n{color:var(--accent-fg);opacity:.85}
+.tab:focus-visible,.btn:focus-visible,.chip:focus-visible,.blank:focus-visible,.lv:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.panel{background:var(--face);border:1px solid var(--line);border-radius:18px;padding:18px 16px;display:grid;gap:14px}
+.bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.btn{font-family:var(--display);font-size:1rem;border:2px solid var(--line);background:var(--face);color:var(--fg);border-radius:999px;padding:7px 14px;cursor:pointer;line-height:1.1}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.small{font-size:.9rem;padding:4px 10px}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+label.sw{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-size:1rem;cursor:pointer}
+label.sw input{width:20px;height:20px;accent-color:var(--accent)}
+
+.lines{display:grid;gap:10px}
+.line{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;padding:10px 12px;border-radius:14px;background:var(--soft)}
+.line.playing{box-shadow:0 0 0 3px var(--accent)}
+.who{font-family:var(--display);font-size:.95rem;border-radius:999px;padding:4px 10px;white-space:nowrap;margin-top:3px}
+.who-0 .who{background:var(--role0);color:var(--role0-fg)}
+.who-1 .who{background:var(--role1);color:var(--role1-fg)}
+.txt{min-width:0}
+.ko{margin:0;font-size:clamp(1.05rem,2.6vw,1.3rem);font-weight:700;word-break:keep-all;line-height:1.6}
+.fr{margin:4px 0 0;color:var(--muted);font-size:.95rem;display:none}
+.show-fr .fr{display:block}
+.line.other .ko{font-weight:400;color:var(--muted)}
+.line.other .who{opacity:.65}
+.callout{border-left:5px solid var(--accent);background:var(--soft);padding:10px 14px;border-radius:0 12px 12px 0;font-size:.98rem}
+
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.key{border:2px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:4px;align-content:start}
+.key .kko{font-family:var(--display);font-size:1.5rem;line-height:1.15}
+.key .kfr{font-weight:700}
+.key .kuse{color:var(--muted);font-size:.92rem}
+.key .btn{justify-self:start;margin-top:4px}
+
+.blank{font-family:var(--display);font-size:1.05em;border:2px dashed var(--accent);background:var(--face);color:var(--fg);border-radius:10px;padding:2px 10px;cursor:pointer;min-width:5.5em;line-height:1.3;vertical-align:baseline}
+.blank.active{background:var(--accent);color:var(--accent-fg);border-style:solid}
+.blank.ok,.blank-in.ok{border-color:var(--ok);background:var(--okbg)}
+.blank.bad,.blank-in.bad{border-color:var(--bad);background:var(--badbg)}
+.blank-in{font:inherit;font-family:var(--display);font-size:1.05em;border:2px solid var(--line);border-bottom:3px solid var(--accent);background:var(--face);color:var(--fg);border-radius:10px;padding:2px 8px;max-width:100%;text-align:center;line-height:1.3;vertical-align:baseline}
+.blank-in:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--display);font-size:1.1rem;border:2px solid var(--accent);background:var(--face);color:var(--accent);border-radius:999px;padding:6px 14px;cursor:pointer;line-height:1.1;display:grid;gap:2px;text-align:center}
+.chip .c-fr{font-family:var(--body);font-size:.74rem;font-weight:400;color:var(--muted)}
+.chip:disabled{opacity:.35;cursor:default}
+.result{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.result.good{color:var(--ok)} .result.so{color:var(--bad)}
+
+.roles{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.swaps{display:grid;gap:8px}
+.swap{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.swap .from{font-family:var(--display);font-size:1.05rem;min-width:5em}
+.swap .chip{font-size:1rem;padding:4px 12px}
+.swap .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.timer{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.clock{font-family:var(--display);font-size:2.2rem;font-variant-numeric:tabular-nums;min-width:3.2em;line-height:1}
+.clock.done{color:var(--bad)}
+.check{display:grid;gap:6px}
+.check label{display:flex;gap:10px;align-items:center;font-size:1rem;cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.vbox{display:grid;gap:6px}
+.note{margin:0;color:var(--muted);font-size:.85rem}
+.note.alert{color:var(--bad);font-weight:700}
+.vhelp{font-size:.85rem;color:var(--muted)}
+.vhelp summary{cursor:pointer;font-family:var(--display);color:var(--fg);font-size:.95rem}
+.vhelp ul{margin:6px 0 0;padding-left:18px;display:grid;gap:4px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<main class="wrap">
+  <header>
+    <h1 id="title">할머니 댁에 도착했어요</h1>
+    <p class="intro" id="intro">여름방학에 한국에 왔어요. 지금 막 할머니 댁 문이 열렸어요.</p>
+    <div class="head-row">
+      <div class="levels" role="group" aria-label="수준" id="levels"></div>
+      <button type="button" class="btn small" id="voiceTest">🔊 소리 확인</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="단계">
+    <button type="button" class="tab" role="tab" id="tab-dialogue" aria-selected="true" aria-controls="p-dialogue" data-tab="dialogue"><span class="n">1단계</span>대화 듣기</button>
+    <button type="button" class="tab" role="tab" id="tab-phrases" aria-selected="false" aria-controls="p-phrases" data-tab="phrases"><span class="n">2단계</span>핵심 표현</button>
+    <button type="button" class="tab" role="tab" id="tab-blanks" aria-selected="false" aria-controls="p-blanks" data-tab="blanks"><span class="n">3단계</span>빈칸 채우기</button>
+    <button type="button" class="tab" role="tab" id="tab-pair" aria-selected="false" aria-controls="p-pair" data-tab="pair"><span class="n">4단계</span>짝 활동</button>
+  </nav>
+
+  <!-- 1단계 -->
+  <section class="panel" id="p-dialogue" role="tabpanel" aria-labelledby="tab-dialogue">
+    <div>
+      <h2>대화 듣기</h2>
+      <p class="lead">먼저 프랑스어 없이 듣고, 무슨 뜻인지 짐작해 보세요. 그다음 프랑스어를 켜서 확인해요.</p>
+    </div>
+    <div class="bar">
+      <label class="sw"><input type="checkbox" id="frToggle"> 프랑스어 보기</label>
+      <button type="button" class="btn primary" id="playAll">▶ 전체 듣기</button>
+    </div>
+    <div class="lines" id="dialogueLines"></div>
+    <div class="callout" id="culture"></div>
+  </section>
+
+  <!-- 2단계 -->
+  <section class="panel" id="p-phrases" role="tabpanel" aria-labelledby="tab-phrases" hidden>
+    <div>
+      <h2>핵심 표현 5개</h2>
+      <p class="lead">🔊를 누르고 따라 읽어요. 이 다섯 표현이 3단계 빈칸에 나와요.</p>
+    </div>
+    <div class="keys" id="keyCards"></div>
+  </section>
+
+  <!-- 3단계 -->
+  <section class="panel" id="p-blanks" role="tabpanel" aria-labelledby="tab-blanks" hidden>
+    <div>
+      <h2>빈칸 채우기</h2>
+      <p class="lead" id="blanksLead"></p>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="lines" id="blankLines"></div>
+    <div class="bar">
+      <div class="result" id="result" aria-live="polite"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn" id="showAnswers" hidden>정답 보기</button>
+        <button type="button" class="btn" id="resetBlanks">다시 하기</button>
+        <button type="button" class="btn primary" id="checkBlanks">정답 확인</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4단계 -->
+  <section class="panel" id="p-pair" role="tabpanel" aria-labelledby="tab-pair" hidden>
+    <div>
+      <h2>짝 활동: 역할 바꿔 말하기</h2>
+      <p class="lead">둘이 역할을 정하고 대화를 읽어요. 2분이 지나면 역할을 바꿔요. 그다음 '내 이야기로 바꾸기'로 단어를 바꿔서 다시 해 봐요.</p>
+    </div>
+    <div class="roles" id="roles">
+      <span style="font-family:var(--display)">나는</span>
+      <button type="button" class="btn" data-role="0" aria-pressed="false">할머니</button>
+      <button type="button" class="btn" data-role="1" aria-pressed="false">수아</button>
+      <button type="button" class="btn" data-role="all" aria-pressed="true">둘 다 보기</button>
+      <button type="button" class="btn small" id="swapRoles">↔ 역할 바꾸기</button>
+    </div>
+    <div class="timer">
+      <span class="clock" id="clock">2:00</span>
+      <button type="button" class="btn primary" id="timerStart">시작</button>
+      <button type="button" class="btn" id="timerReset">처음으로</button>
+      <span id="timerMsg" style="font-family:var(--display);color:var(--bad)"></span>
+    </div>
+    <div class="lines" id="pairLines"></div>
+    <div>
+      <h2 style="font-size:1.2rem">내 이야기로 바꾸기</h2>
+      <p class="lead">단어를 고르면 위 대화가 바뀌어요. 바뀐 대화로 다시 말해 보세요.</p>
+      <div class="swaps" id="swaps"></div>
+    </div>
+    <div>
+      <h2 style="font-size:1.2rem">발표 체크</h2>
+      <div class="check" id="checklist"></div>
+    </div>
+  </section>
+
+  <div class="vbox">
+    <p class="note" id="voiceNote" aria-live="polite">🔊는 이 기기에 들어 있는 한국어 음성으로 읽어요. 수업 전에 '소리 확인'을 한 번 눌러 보세요. 링크 끝에 #basic, #mid, #adv를 붙이면 그 수준으로 바로 열려요.</p>
+    <details class="vhelp">
+      <summary>소리가 안 나요?</summary>
+      <ul>
+        <li>🔊는 기기에 설치된 한국어 음성을 써요. 한국어 음성이 없거나 앱이 음성 읽기를 막으면 소리가 안 나요.</li>
+        <li>가장 간단한 방법: 링크를 복사해서 Chrome이나 Edge 브라우저에서 열기. 두 브라우저에는 한국어 음성이 들어 있어요.</li>
+        <li>휴대폰: 아이폰은 Safari, 안드로이드는 Chrome 앱에서 링크 열기. 무음 모드와 음량을 확인해요.</li>
+        <li>Windows에 음성 설치: 설정 → 시간 및 언어 → 언어 → 언어 추가 → 한국어(음성 합성 포함) → 앱 다시 열기</li>
+        <li>Mac에 음성 설치: 시스템 설정 → 손쉬운 사용 → 읽어주기 → 시스템 음성 → 관리 → 한국어 내려받기</li>
+        <li>그래도 안 되면 선생님이 직접 읽어 주세요. 활동은 소리 없이도 다 돼요.</li>
+      </ul>
+    </details>
+  </div>
+</main>
+
+<script>
+// ===== 여기만 바꾸면 됩니다 =====
+const SITUATION = {
+  title: "할머니 댁에 도착했어요",
+  intro: "여름방학에 한국에 왔어요. 지금 막 할머니 댁 문이 열렸어요.",
+  roles: ["할머니", "수아"],
+  culture: "💡 프랑스어로는 할머니께 tu라고 해도 되지만, 한국어로는 가족 어른께도 존댓말(-요, -세요)을 써요. 수아의 말이 모두 -요로 끝나는 걸 찾아보세요."
+};
+// who: 0 = 첫 번째 역할, 1 = 두 번째 역할
+// blanks: 3단계에서 빈칸이 될 표현. t = 문장 안에 그대로 있는 말, fr = 프랑스어 뜻(초급 칩에 보임), lv = 1 초급부터 / 2 중급부터 / 3 고급만
+const DIALOGUE = [
+  { who: 0, ko: "아이고, 우리 수아 왔구나! 어서 와라.", fr: "Oh, notre Sua est arrivée ! Entre vite.", blanks: [{ t: "어서 와라", fr: "Entre vite", lv: 3 }] },
+  { who: 1, ko: "할머니, 안녕하세요! 잘 지내셨어요?", fr: "Bonjour, grand-mère ! Tu vas bien ?", blanks: [{ t: "안녕하세요", fr: "Bonjour", lv: 1 }, { t: "잘 지내셨어요", fr: "Tu vas bien ?", lv: 2 }] },
+  { who: 0, ko: "그럼, 잘 지냈지. 비행기 타고 오느라 힘들었지?", fr: "Bien sûr, je vais bien. Le voyage en avion était fatigant, non ?", blanks: [{ t: "힘들었지", fr: "c'était fatigant, non ?", lv: 3 }] },
+  { who: 1, ko: "조금 힘들었어요. 그래도 할머니가 보고 싶었어요.", fr: "Un peu. Mais tu m'as manqué, grand-mère.", blanks: [{ t: "보고 싶었어요", fr: "Tu m'as manqué", lv: 1 }] },
+  { who: 0, ko: "나도 많이 보고 싶었다. 배고프지? 할머니가 불고기 만들었어.", fr: "Toi aussi, tu m'as beaucoup manqué. Tu as faim ? J'ai préparé du bulgogi." },
+  { who: 1, ko: "와, 불고기! 제가 제일 좋아하는 거예요. 잘 먹겠습니다!", fr: "Waouh, du bulgogi ! C'est mon plat préféré. Merci pour le repas !", blanks: [{ t: "잘 먹겠습니다", fr: "Merci pour le repas (avant de manger)", lv: 1 }] },
+  { who: 0, ko: "많이 먹어라. 프랑스에서 한국어 공부 열심히 했니?", fr: "Mange bien. Tu as bien travaillé ton coréen en France ?", blanks: [{ t: "많이 먹어라", fr: "Mange bien", lv: 3 }] },
+  { who: 1, ko: "네, 한글학교에서 열심히 배웠어요.", fr: "Oui, j'ai bien appris à l'école coréenne.", blanks: [{ t: "배웠어요", fr: "j'ai appris", lv: 2 }] }
+];
+const KEY = [
+  { ko: "안녕하세요", fr: "Bonjour (forme polie)", use: "어른께 인사할 때" },
+  { ko: "잘 지내셨어요?", fr: "Vous allez bien ? (à un aîné)", use: "오랜만에 만난 어른께 안부를 물을 때" },
+  { ko: "보고 싶었어요", fr: "Tu m'as manqué / Vous m'avez manqué", use: "그리웠다고 말할 때" },
+  { ko: "잘 먹겠습니다", fr: "(avant de manger) Merci pour le repas", use: "밥을 먹기 전에 하는 인사. 프랑스어에는 꼭 맞는 말이 없어요" },
+  { ko: "열심히 배웠어요", fr: "J'ai bien appris", use: "노력했다고 말할 때" }
+];
+const EXTRA_CHIPS = [{ t: "안녕히 가세요", fr: "Au revoir (à qqn qui part)" }, { t: "잘 잤어요", fr: "J'ai bien dormi" }];   // 헷갈리는 칩
+// 수준: maxLv = 이 수준에서 쓰는 빈칸(lv), frOn = 프랑스어를 켜고 시작, chipFr = 칩에 프랑스어 뜻, typed = 칩 없이 직접 입력, extra = 헷갈리는 칩 수
+const LEVELS = {
+  basic: { name: "초급", hint: "프랑스어 켜짐 · 빈칸 3개", maxLv: 1, frOn: true,  chipFr: true,  typed: false, extra: 2, lead: "빈칸 3개. 빈칸을 누른 다음 아래 칩을 눌러 채워요. 칩에 프랑스어 뜻이 같이 보여요." },
+  mid:   { name: "중급", hint: "빈칸 5개",              maxLv: 2, frOn: false, chipFr: false, typed: false, extra: 2, lead: "빈칸 5개. 빈칸을 누른 다음 아래 칩을 눌러 채워요. 다 채우면 정답 확인!" },
+  adv:   { name: "고급", hint: "빈칸 8개 · 직접 쓰기",  maxLv: 3, frOn: false, chipFr: false, typed: true,  extra: 0, lead: "빈칸 8개. 칩 없이 직접 써 넣어요. 띄어쓰기와 마침표는 틀려도 괜찮아요." }
+};
+const SWAPS = [
+  { from: "불고기", to: ["떡볶이", "김밥", "잡채"] },
+  { from: "할머니", to: ["할아버지", "이모", "삼촌"] },
+  { from: "비행기", to: ["기차", "버스"] }
+];
+const CHECKLIST = ["큰 소리로 또박또박 말했어요", "인사할 때 고개를 살짝 숙였어요", "어른께 존댓말(-요)을 썼어요"];
+const TIMER_SECONDS = 120;
+// ================================
+
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function shuffle(a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function norm(s){ return String(s || "").replace(/[\s.?!,~]/g, ""); }
+let level = "basic";
+
+/* ---------- 소리 (기기의 한국어 음성 사용) ---------- */
+const UA = navigator.userAgent || "";
+const PLATFORM = /iPhone|iPad|iPod/.test(UA) ? "ios" : /Android/.test(UA) ? "android" : /Windows/.test(UA) ? "windows" : /Mac/.test(UA) ? "mac" : "other";
+const TIPS = {
+  ios: "아이폰·아이패드라면 같은 링크를 Safari에서 열어 보세요. 옆면 무음 스위치가 켜져 있으면 소리가 안 나요.",
+  android: "안드로이드라면 같은 링크를 Chrome 앱에서 열어 보세요. Claude 앱 화면 안에서는 음성 읽기가 안 돼요.",
+  windows: "윈도우라면 같은 링크를 Edge나 Chrome에서 열어 보세요. 두 브라우저에는 한국어 음성이 들어 있어요.",
+  mac: "맥이라면 같은 링크를 Chrome에서 열어 보세요. 또는 시스템 설정 → 손쉬운 사용 → 읽어주기에서 한국어 음성을 내려받아요.",
+  other: "같은 링크를 Chrome 브라우저에서 열어 보세요."
+};
+let KO_VOICE = null, voicesReady = false;
+function findKoVoice(){
+  try{
+    const vs = speechSynthesis.getVoices();
+    if (vs.length) voicesReady = true;
+    KO_VOICE = vs.find(v => v.lang && v.lang.toLowerCase().replace("_", "-").startsWith("ko")) || null;
+  }catch(e){}
+  return KO_VOICE;
+}
+function voiceNote(msg, alert){ const n = $("#voiceNote"); if (!n) return; n.textContent = msg; n.classList.toggle("alert", !!alert); }
+function voiceStatus(){
+  if (!("speechSynthesis" in window)){ voiceNote("이 앱에서는 소리 읽기를 쓸 수 없어요. " + TIPS[PLATFORM], true); return; }
+  const v = findKoVoice();
+  if (v) voiceNote("🔊 한국어 음성 준비됨 (" + v.name + "). 수업 전에 '소리 확인'을 한 번 눌러 보세요.");
+  else if (voicesReady) voiceNote("이 기기에 한국어 음성이 없어요. " + TIPS[PLATFORM], true);
+}
+if ("speechSynthesis" in window){
+  voiceStatus();
+  try{ speechSynthesis.addEventListener("voiceschanged", voiceStatus); }catch(e){}
+  setTimeout(() => { if (!voicesReady){ findKoVoice(); if (!voicesReady) voiceNote("음성 목록을 받지 못했어요. 이 앱이 음성 읽기를 막는 것 같아요. " + TIPS[PLATFORM], true); } }, 2500);
+} else { voiceStatus(); }
+function noVoiceNote(){
+  if (!("speechSynthesis" in window)){ voiceNote("이 앱에서는 소리 읽기를 쓸 수 없어요. " + TIPS[PLATFORM], true); return true; }
+  if (findKoVoice()) return false;
+  voiceNote((voicesReady ? "한국어 음성이 없어서 소리가 안 날 수 있어요. " : "음성 목록을 아직 못 받았어요. ") + TIPS[PLATFORM], true);
+  return false;
+}
+function makeUtter(text){
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "ko-KR"; u.rate = 0.85;
+  if (KO_VOICE) u.voice = KO_VOICE;
+  u.onerror = (e) => { if (e && e.error === "interrupted") return; voiceNote("소리를 내지 못했어요 (" + ((e && e.error) || "오류") + "). " + TIPS[PLATFORM], true); };
+  return u;
+}
+function speak(text){
+  if (noVoiceNote()) return;
+  try{
+    const u = makeUtter(text);
+    if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }catch(e){ voiceNote("소리를 내지 못했어요. " + TIPS[PLATFORM], true); }
+}
+function voiceTest(){ speak("안녕하세요"); }
+$("#voiceTest").addEventListener("click", voiceTest);
+let playing = false;
+function playAll(){
+  if (noVoiceNote()) return;
+  if (playing){ stopAll(); return; }
+  playing = true; $("#playAll").textContent = "■ 멈추기";
+  const lines = $$("#dialogueLines .line");
+  try{
+    if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+    // 버튼을 누른 순간에 전부 줄 세워 두면 휴대폰에서도 끝까지 읽어요
+    DIALOGUE.forEach((l, i) => {
+      const u = makeUtter(l.ko);
+      u.onstart = () => { lines.forEach(x => x.classList.remove("playing")); if (lines[i]) lines[i].classList.add("playing"); };
+      if (i === DIALOGUE.length - 1) u.onend = () => stopAll();
+      speechSynthesis.speak(u);
+    });
+  }catch(e){ stopAll(); }
+}
+function stopAll(){
+  playing = false; $("#playAll").textContent = "▶ 전체 듣기";
+  $$("#dialogueLines .line").forEach(l => l.classList.remove("playing"));
+  try{ if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel(); }catch(e){}
+}
+
+/* ---------- 머리글 ---------- */
+document.title = SITUATION.title;
+$("#title").textContent = SITUATION.title;
+$("#intro").textContent = SITUATION.intro;
+$("#culture").textContent = SITUATION.culture;
+
+/* ---------- 탭 ---------- */
+const TABS = ["dialogue", "phrases", "blanks", "pair"];
+function showTab(name){
+  if (!TABS.includes(name)) name = "dialogue";
+  TABS.forEach(t => {
+    $("#tab-" + t).setAttribute("aria-selected", String(t === name));
+    $("#p-" + t).hidden = t !== name;
+  });
+  if (name !== "dialogue") stopAll();
+}
+$$(".tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+
+/* ---------- 1단계: 대화 ---------- */
+function lineHTML(l, i, opts){
+  const o = opts || {};
+  const ko = o.ko !== undefined ? o.ko : esc(l.ko);
+  const who = o.who !== undefined ? o.who : SITUATION.roles[l.who];
+  return `<div class="line who-${l.who}${o.cls ? " " + o.cls : ""}" data-i="${i}">
+    <span class="who">${esc(who)}</span>
+    <div class="txt"><p class="ko">${ko}</p>${o.noFr ? "" : `<p class="fr">${esc(l.fr)}</p>`}</div>
+    <button type="button" class="btn small" data-say="${esc(o.say !== undefined ? o.say : l.ko)}" aria-label="듣기">🔊</button>
+  </div>`;
+}
+$("#dialogueLines").innerHTML = DIALOGUE.map((l, i) => lineHTML(l, i)).join("");
+$("#frToggle").addEventListener("change", e => document.body.classList.toggle("show-fr", e.target.checked));
+$("#playAll").addEventListener("click", playAll);
+document.addEventListener("click", e => { const b = e.target.closest("[data-say]"); if (b) speak(b.dataset.say); });
+
+/* ---------- 2단계: 핵심 표현 ---------- */
+$("#keyCards").innerHTML = KEY.map(k => `<div class="key">
+  <span class="kko">${esc(k.ko)}</span>
+  <span class="kfr">${esc(k.fr)}</span>
+  <span class="kuse">${esc(k.use)}</span>
+  <button type="button" class="btn small" data-say="${esc(k.ko)}">🔊 듣고 따라 하기</button>
+</div>`).join("");
+
+/* ---------- 3단계: 빈칸 (수준별) ---------- */
+let answers = [], chipItems = [], fills = {}, active = null, checked = false;
+function activeBlanks(l){ return (l.blanks || []).filter(b => b.lv <= LEVELS[level].maxLv); }
+function clearResult(){ checked = false; $("#result").textContent = ""; $("#result").className = "result"; $("#showAnswers").hidden = true; }
+function setupBlanks(){
+  answers = [];
+  DIALOGUE.forEach((l, li) => activeBlanks(l).forEach((b, bi) => answers.push({ key: li + "-" + bi, text: b.t, fr: b.fr })));
+  const extra = EXTRA_CHIPS.slice(0, LEVELS[level].extra);
+  chipItems = shuffle(answers.map(a => ({ t: a.text, fr: a.fr })).concat(extra));
+  fills = {}; active = null;
+  clearResult();
+  $("#blanksLead").textContent = LEVELS[level].lead;
+  $("#chips").hidden = LEVELS[level].typed;
+}
+function blankLineKo(l, li){
+  let html = "", rest = l.ko;
+  activeBlanks(l).forEach((b, bi) => {
+    const idx = rest.indexOf(b.t);
+    if (idx < 0) return;
+    const key = li + "-" + bi, val = fills[key] || "";
+    const state = checked ? (norm(val) === norm(b.t) ? "ok" : "bad") : "";
+    html += esc(rest.slice(0, idx));
+    if (LEVELS[level].typed){
+      html += `<input type="text" class="blank-in ${state}" data-key="${key}" id="blank-${key}" value="${esc(val)}" placeholder="____" autocomplete="off" autocapitalize="off" aria-label="빈칸" style="width:${b.t.length + 2.5}em">`;
+    } else {
+      const cls = ["blank", key === active ? "active" : "", state].join(" ").trim();
+      html += `<button type="button" class="${cls}" data-key="${key}" id="blank-${key}">${val ? esc(val) : "____"}</button>`;
+    }
+    rest = rest.slice(idx + b.t.length);
+  });
+  return html + esc(rest);
+}
+function firstEmpty(){ const a = answers.find(a => !fills[a.key]); return a ? a.key : null; }
+function renderBlanks(){
+  $("#blankLines").innerHTML = DIALOGUE.map((l, i) => activeBlanks(l).length ? lineHTML(l, i, { ko: blankLineKo(l, i), noFr: true }) : lineHTML(l, i, { noFr: true })).join("");
+  const used = Object.values(fills);
+  $("#chips").innerHTML = chipItems.map((c, i) => `<button type="button" class="chip" id="chip-${i}" data-text="${esc(c.t)}" ${used.includes(c.t) ? "disabled" : ""}><span class="c-ko">${esc(c.t)}</span>${LEVELS[level].chipFr ? `<span class="c-fr">${esc(c.fr || "")}</span>` : ""}</button>`).join("");
+}
+$("#blankLines").addEventListener("click", e => {
+  const b = e.target.closest(".blank"); if (!b) return;
+  if (checked) clearResult();
+  if (fills[b.dataset.key]) delete fills[b.dataset.key];
+  active = b.dataset.key; renderBlanks();
+});
+$("#blankLines").addEventListener("input", e => {
+  const i = e.target.closest(".blank-in"); if (!i) return;
+  fills[i.dataset.key] = i.value;
+  i.classList.remove("ok", "bad");
+  if (checked) clearResult();
+});
+$("#blankLines").addEventListener("keydown", e => {
+  if (e.key !== "Enter" || !e.target.closest(".blank-in")) return;
+  e.preventDefault();
+  const all = $$(".blank-in"), k = all.indexOf(e.target);
+  if (k >= 0 && k < all.length - 1) all[k + 1].focus(); else $("#checkBlanks").focus();
+});
+$("#chips").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c || c.disabled) return;
+  if (checked) clearResult();
+  if (!active || fills[active]) active = firstEmpty();
+  if (!active) return;
+  fills[active] = c.dataset.text;
+  active = firstEmpty(); renderBlanks();
+});
+$("#checkBlanks").addEventListener("click", () => {
+  checked = true; active = null;
+  const n = answers.filter(a => norm(fills[a.key]) === norm(a.text)).length;
+  const r = $("#result");
+  if (n === answers.length){ r.textContent = "모두 맞았어요! 🎉 이제 4단계에서 짝과 말해 보세요."; r.className = "result good"; }
+  else { r.textContent = `${answers.length}개 중 ${n}개 맞았어요. ${LEVELS[level].typed ? "빨간 칸을 고쳐 써 보세요." : "빨간 칸을 눌러 다시 골라요."}`; r.className = "result so"; $("#showAnswers").hidden = !LEVELS[level].typed; }
+  renderBlanks();
+});
+$("#showAnswers").addEventListener("click", () => {
+  answers.forEach(a => { fills[a.key] = a.text; });
+  checked = true; renderBlanks();
+  $("#result").textContent = "정답을 채워 넣었어요. 소리 내어 읽은 다음 '다시 하기'로 혼자 풀어 보세요."; $("#result").className = "result";
+  $("#showAnswers").hidden = true;
+});
+$("#resetBlanks").addEventListener("click", () => { fills = {}; active = null; clearResult(); renderBlanks(); });
+
+/* ---------- 수준 ---------- */
+function renderLevels(){
+  $("#levels").innerHTML = Object.keys(LEVELS).map(k => `<button type="button" class="lv" id="lv-${k}" data-level="${k}" aria-pressed="${k === level}">${esc(LEVELS[k].name)}<small>${esc(LEVELS[k].hint)}</small></button>`).join("");
+}
+function setLevel(k){
+  if (!LEVELS[k]) return;
+  level = k; renderLevels();
+  $("#frToggle").checked = LEVELS[k].frOn;
+  document.body.classList.toggle("show-fr", LEVELS[k].frOn);
+  setupBlanks(); renderBlanks();
+}
+$("#levels").addEventListener("click", e => { const b = e.target.closest("[data-level]"); if (b) setLevel(b.dataset.level); });
+
+/* ---------- 4단계: 짝 활동 ---------- */
+let myRole = "all";
+let swapChoice = {};
+function applySwaps(t){ let s = t; for (const k in swapChoice){ s = s.split(k).join(swapChoice[k]); } return s; }
+function renderPair(){
+  $("#pairLines").innerHTML = DIALOGUE.map((l, i) => {
+    const ko = applySwaps(l.ko);
+    const other = myRole !== "all" && String(l.who) !== myRole;
+    return lineHTML(l, i, { ko: esc(ko), say: ko, who: applySwaps(SITUATION.roles[l.who]), noFr: true, cls: other ? "other" : "" });
+  }).join("");
+  $$("#roles [data-role]").forEach(b => {
+    b.setAttribute("aria-pressed", String(b.dataset.role === myRole));
+    if (b.dataset.role !== "all") b.textContent = applySwaps(SITUATION.roles[Number(b.dataset.role)]);
+  });
+}
+$("#roles").addEventListener("click", e => {
+  const b = e.target.closest("[data-role]"); if (!b) return;
+  myRole = b.dataset.role; renderPair();
+});
+$("#swapRoles").addEventListener("click", () => { myRole = myRole === "0" ? "1" : "0"; renderPair(); });
+$("#swaps").innerHTML = SWAPS.map((s, si) => `<div class="swap"><span class="from">${esc(s.from)} →</span>${s.to.map((t, ti) => `<button type="button" class="chip" id="swap-${si}-${ti}" data-from="${esc(s.from)}" data-to="${esc(t)}" aria-pressed="false">${esc(t)}</button>`).join("")}</div>`).join("");
+$("#swaps").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  const on = c.getAttribute("aria-pressed") === "true";
+  $$(`#swaps .chip[data-from="${CSS.escape(c.dataset.from)}"]`).forEach(x => x.setAttribute("aria-pressed", "false"));
+  if (on){ delete swapChoice[c.dataset.from]; } else { swapChoice[c.dataset.from] = c.dataset.to; c.setAttribute("aria-pressed", "true"); }
+  renderPair();
+});
+$("#checklist").innerHTML = CHECKLIST.map((c, i) => `<label><input type="checkbox" id="check-${i}"> ${esc(c)}</label>`).join("");
+renderPair();
+
+/* 타이머 */
+let left = TIMER_SECONDS, tick = null;
+function fmt(s){ return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+function drawClock(){ $("#clock").textContent = fmt(left); $("#clock").classList.toggle("done", left === 0); }
+$("#timerStart").addEventListener("click", () => {
+  if (tick){ clearInterval(tick); tick = null; $("#timerStart").textContent = "시작"; return; }
+  if (left === 0) left = TIMER_SECONDS;
+  $("#timerMsg").textContent = "";
+  $("#timerStart").textContent = "멈춤";
+  tick = setInterval(() => {
+    left--; drawClock();
+    if (left <= 0){ clearInterval(tick); tick = null; $("#timerStart").textContent = "시작"; $("#timerMsg").textContent = "시간 끝! 역할을 바꿔 보세요."; }
+  }, 1000);
+});
+$("#timerReset").addEventListener("click", () => { clearInterval(tick); tick = null; left = TIMER_SECONDS; $("#timerMsg").textContent = ""; $("#timerStart").textContent = "시작"; drawClock(); });
+drawClock();
+
+/* ---------- 시작: 링크의 #수준 / #단계 ---------- */
+const h = location.hash.replace("#", "");
+setLevel(LEVELS[h] ? h : level);
+showTab(TABS.includes(h) ? h : "dialogue");
+</script>
